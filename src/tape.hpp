@@ -25,15 +25,15 @@ public:
 
 	template <typename T>
 	void push(T&& adj_calc)
-	{ 
-		_tape.emplace_back(adj_calc);
+	{
+		_tape.emplace_back(std::move(adj_calc));
 	}
 
 	void execute();
 
 private:
 	std::vector<std::function<void()>> _tape;
-	
+
 private:
 	static Tape* _last;
 	static std::vector<Tape*> _tapes;

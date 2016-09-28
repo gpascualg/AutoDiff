@@ -1,4 +1,4 @@
-#include "tape.h"
+#include "tape.hpp"
 
 Tape* Tape::_last = nullptr;
 std::vector<Tape*> Tape::_tapes{};
@@ -7,8 +7,10 @@ void Tape::execute()
 {
 	while (!_tape.empty())
 	{
-		const std::function<void()>& calc_adj = _tape.back();
-		calc_adj();
+		// Call tape.back()
+		_tape.back()();
+
+		// Pop function
 		_tape.pop_back();
 	}
 }

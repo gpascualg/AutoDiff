@@ -2,3 +2,5 @@
 *.vcxproj.filters
 Debug/
 Release/
+[bB]uild/
+*.pyc
