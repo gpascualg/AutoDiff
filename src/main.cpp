@@ -30,19 +30,16 @@ int main()
 	constexpr int dim1 = 3;
 	constexpr int dim2 = 4;
 
-	auto x = Variable({dim1, dim2}, 1);
-	auto y = Variable({dim1, dim2}, 2);
-	auto z = Variable({dim1, dim2}, 2);
+	auto& x = Variable({dim1, dim2}, 1);
+	auto& y = Variable({dim1, dim2}, 2);
+	auto& z = Variable({dim1, dim2}, 2);
 
 	x()[3] = 5;
 
-	matprint(x);
-
-	auto& r = transpose(x);
+	auto& r = x + y;
 
 	matprint(r);
 
-	printf("%.16f\n", r()[0]);
 	//getchar();
 
 	r.flag();

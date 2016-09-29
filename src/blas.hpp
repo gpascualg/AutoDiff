@@ -8,7 +8,7 @@
 #include <cmath>
 
 #include <cblas.h>
-//#include <common_interface.h>
+#include <openvml.h>
 
 
 namespace Bare
@@ -85,19 +85,31 @@ namespace Bare
 		};
 
 
-        // BLAS SPECIFIC METHODS
-		// a = scale * b + a
+        // Type specific methods
         template <typename DType>
-        void cblas_axpy(Shape& shape, DType* a, DType* b, DType scale = 1.0);
+        void elementwise_add(Shape& shape, DType* a, DType* b);
 
-        template <> void cblas_axpy(Shape& shape, float* a, float* b, float scale)
+        template <> void elementwise_add(Shape& shape, float* a, float* b)
         {
-            cblas_saxpy(shape.prod(), scale, b, 1, a, 1);
+            vsAdd(shape.prod(), a, b, a);
         }
 
-        template <> void cblas_axpy(Shape& shape, double* a, double* b, double scale)
+        template <> void elementwise_add(Shape& shape, double* a, double* b)
         {
-            cblas_daxpy(shape.prod(), scale, b, 1, a, 1);
+            vdAdd(shape.prod(), a, b, a);
+        }
+
+        template <typename DType>
+        void elementwise_sub(Shape& shape, DType* a, DType* b);
+
+        template <> void elementwise_sub(Shape& shape, float* a, float* b)
+        {
+            vsSub(shape.prod(), a, b, a);
+        }
+
+        template <> void elementwise_sub(Shape& shape, double* a, double* b)
+        {
+            vdSub(shape.prod(), a, b, a);
         }
 
 		// c = alpha * a * b + beta * c
@@ -130,12 +142,12 @@ namespace Bare
 			auto r = new BLAS::Variable<DType>(&a);
 
             // Sum
-            cblas_axpy(a._shape, r->_values, b._values);
+			elementwise_add(a._shape, r->_values, b._values);
 
             // Adjoint
 			Tape::current()->push([&a, &b, r]() {
-                cblas_axpy(a._shape, a._adjs, r->_adjs);
-                cblas_axpy(b._shape, b._adjs, r->_adjs);
+                elementwise_add(a._shape, a._adjs, r->_adjs);
+                elementwise_add(b._shape, b._adjs, r->_adjs);
 			});
 
 			return *r;
@@ -147,12 +159,12 @@ namespace Bare
 			auto r = new BLAS::Variable<DType>(&a);
 
             // Substract
-            cblas_axpy(a._shape, r->_values, b._values, -1.0);
+            elementwise_sub(a._shape, r->_values, b._values);
 
             // Adjoint
 			Tape::current()->push([&a, &b, r]() {
-                cblas_axpy(a._shape, a._adjs, r->_adjs);
-                cblas_axpy(b._shape, b._adjs, r->_adjs, -1.0);
+                elementwise_add(a._shape, a._adjs, r->_adjs);
+                elementwise_sub(b._shape, b._adjs, r->_adjs);
 			});
 
 			return *r;
