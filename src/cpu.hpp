@@ -23,7 +23,7 @@ namespace Bare
 
 		public:
 			Variable(Shape shape, DType value = 0, DType adj = 0) :
-				_shape(shape)
+				Bare::Variable<DType>(shape)
 			{
 				_values = new DType[shape.prod()];
 				_adjs = new DType[shape.prod()];
@@ -46,13 +46,12 @@ namespace Bare
 			void flag() override
 			{
 				// Set all adjacent values to 1
-				SHAPE_LOOP(_shape) {
-					_adjs[_shape.idx(x, y)] = 1;
+				SHAPE_LOOP(this->_shape) {
+					_adjs[this->_shape.idx(x, y)] = 1;
 				}
 			}
 
 		protected:
-			Shape _shape;
 			DType* _values;
 			DType* _adjs;
 		};

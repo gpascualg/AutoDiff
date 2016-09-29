@@ -8,7 +8,7 @@ RequireExternal(
     TARGET AutoDiff
     EXCLUDE ON
     MODULE xianyi/OpenBLAS:master
-    INC_PATH ""
+    INC_PATH "/"
 )
 
 find_library(OPENBLAS_LIB

@@ -7,20 +7,40 @@
 #include "blas.hpp"
 #include "tape.hpp"
 
+using namespace F32::BLAS;
+
+template <typename DType>
+void matprint(Bare::Variable<DType>& var)
+{
+	for (int y = 0; y < var.shape().m; ++y)
+	{
+		for (int x = 0; x < var.shape().n; ++x)
+		{
+			printf("%05.2f ", var()[var.shape()[{x, y}]]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
 int main()
 {
 	Tape::use(nullptr);
 
-	using namespace F32::BLAS;
-
-	constexpr int dim1 = 5000;
-	constexpr int dim2 = 5000;
+	constexpr int dim1 = 3;
+	constexpr int dim2 = 4;
 
 	auto x = Variable({dim1, dim2}, 1);
 	auto y = Variable({dim1, dim2}, 2);
 	auto z = Variable({dim1, dim2}, 2);
 
-	auto& r = (x * y + z) * y;
+	x()[3] = 5;
+
+	matprint(x);
+
+	auto& r = transpose(x);
+
+	matprint(r);
 
 	printf("%.16f\n", r()[0]);
 	//getchar();

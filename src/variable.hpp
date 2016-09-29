@@ -12,6 +12,8 @@ struct Shape
 	inline constexpr Shape T() const { return { n, m }; }
 	inline constexpr int idx(int x, int y) const { return y * n + x; }
 
+	inline constexpr int operator[](Shape&& shape) { return idx(shape.m, shape.n); }
+
 	int m;
 	int n;
 };
@@ -24,11 +26,21 @@ namespace Bare
 	class Variable
 	{
 	public:
+		explicit Variable(Shape shape):
+			_shape(shape)
+		{}
+
 		virtual ~Variable()
 		{}
 
 		virtual DType* operator()() = 0;
 		virtual DType* adj() = 0;
 		virtual void flag() = 0;
+
+
+        Shape& shape() { return _shape; }
+
+	protected:
+		Shape _shape;
 	};
 }
