@@ -177,6 +177,94 @@ index de9f6b3..22607ac 100644
 -target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
+diff --git a/interface/div.c b/interface/div.c
+index e69de29..a2f27d6 100644
+--- a/interface/div.c
++++ b/interface/div.c
+@@ -0,0 +1,39 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <openvml.h>
++#include <openvml_driver.h>
++#include <openvml_kernel.h>
++
++
++void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y) {
++
++  if (n<=0) return;
++  if (a==NULL || b == NULL || y==NULL) return;
++
++
++  EXEC_VML(0, DIV_K, n, (VML_FLOAT*)a,  (VML_FLOAT*)b, y, NULL, NULL);
++
++}
+diff --git a/interface/mul.c b/interface/mul.c
+index e69de29..4d1d434 100644
+--- a/interface/mul.c
++++ b/interface/mul.c
+@@ -0,0 +1,39 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <openvml.h>
++#include <openvml_driver.h>
++#include <openvml_kernel.h>
++
++
++void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y) {
++
++  if (n<=0) return;
++  if (a==NULL || b == NULL || y==NULL) return;
++
++
++  EXEC_VML(0, MUL_K, n, (VML_FLOAT*)a,  (VML_FLOAT*)b, y, NULL, NULL);
++
++}
 diff --git a/kernel/CMakeLists.txt b/kernel/CMakeLists.txt
 index 51ba9a9..ed99f17 100644
 --- a/kernel/CMakeLists.txt
@@ -314,6 +402,82 @@ index fa9fed5..bd709f2 100644
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
  #set(pow_C_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
+diff --git a/kernel/generic/div_kernel.c b/kernel/generic/div_kernel.c
+index e69de29..b007e48 100644
+--- a/kernel/generic/div_kernel.c
++++ b/kernel/generic/div_kernel.c
+@@ -0,0 +1,33 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG i=0;
++  for(i=0; i<COMPSIZE*n; i++){
++    y[i]=a[i]/b[i];
++  }
++}
+diff --git a/kernel/generic/mul_kernel.c b/kernel/generic/mul_kernel.c
+index e69de29..01b0d95 100644
+--- a/kernel/generic/mul_kernel.c
++++ b/kernel/generic/mul_kernel.c
+@@ -0,0 +1,33 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG i=0;
++  for(i=0; i<COMPSIZE*n; i++){
++    y[i]=a[i]*b[i];
++  }
++}
 diff --git a/kernel/x86_64/Kernel_generic.txt b/kernel/x86_64/Kernel_generic.txt
 index dee6831..8d97693 100644
 --- a/kernel/x86_64/Kernel_generic.txt
@@ -365,6 +529,2708 @@ index 55e5a05..0d31db2 100644
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
  
+diff --git a/kernel/x86_64/ddiv_kernel_avx.c b/kernel/x86_64/ddiv_kernel_avx.c
+index e69de29..e2229bb 100644
+--- a/kernel/x86_64/ddiv_kernel_avx.c
++++ b/kernel/x86_64/ddiv_kernel_avx.c
+@@ -0,0 +1,87 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++#include <immintrin.h>
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
++
++  int i=0;
++
++  while(loop_count>0){
++
++    __m256d av0=_mm256_loadu_pd(a);
++    __m256d av1=_mm256_loadu_pd(a+4);
++    __m256d av2=_mm256_loadu_pd(a+8);
++    __m256d av3=_mm256_loadu_pd(a+12);
++
++    __m256d av4=_mm256_loadu_pd(a+16);
++    __m256d av5=_mm256_loadu_pd(a+20);
++    __m256d av6=_mm256_loadu_pd(a+24);
++    __m256d av7=_mm256_loadu_pd(a+28);
++
++    __m256d bv0=_mm256_loadu_pd(b);
++    __m256d bv1=_mm256_loadu_pd(b+4);
++    __m256d bv2=_mm256_loadu_pd(b+8);
++    __m256d bv3=_mm256_loadu_pd(b+12);
++
++    __m256d bv4=_mm256_loadu_pd(b+16);
++    __m256d bv5=_mm256_loadu_pd(b+20);
++    __m256d bv6=_mm256_loadu_pd(b+24);
++    __m256d bv7=_mm256_loadu_pd(b+28);
++
++
++    __m256d yv0=_mm256_div_pd(av0, bv0);
++    __m256d yv1=_mm256_div_pd(av1, bv1);
++    __m256d yv2=_mm256_div_pd(av2, bv2);
++    __m256d yv3=_mm256_div_pd(av3, bv3);
++
++    __m256d yv4=_mm256_div_pd(av4, bv4);
++    __m256d yv5=_mm256_div_pd(av5, bv5);
++    __m256d yv6=_mm256_div_pd(av6, bv6);
++    __m256d yv7=_mm256_div_pd(av7, bv7);
++
++    _mm256_storeu_pd(y, yv0);
++    _mm256_storeu_pd(y+4, yv1);
++    _mm256_storeu_pd(y+8, yv2);
++    _mm256_storeu_pd(y+12, yv3);
++
++    _mm256_storeu_pd(y+16, yv4);
++    _mm256_storeu_pd(y+20, yv5);
++    _mm256_storeu_pd(y+24, yv6);
++    _mm256_storeu_pd(y+28, yv7);
++
++    a+=32;
++    y+=32;
++    loop_count--;
++  }
++
++  for(i=0; i<remain_count; i++){
++    y[i]=a[i]/b[i];
++  }
++}
+diff --git a/kernel/x86_64/div_kernel.c b/kernel/x86_64/div_kernel.c
+index e69de29..b007e48 100644
+--- a/kernel/x86_64/div_kernel.c
++++ b/kernel/x86_64/div_kernel.c
+@@ -0,0 +1,33 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG i=0;
++  for(i=0; i<COMPSIZE*n; i++){
++    y[i]=a[i]/b[i];
++  }
++}
+diff --git a/kernel/x86_64/dmul_kernel_avx.c b/kernel/x86_64/dmul_kernel_avx.c
+index e69de29..c8bcf63 100644
+--- a/kernel/x86_64/dmul_kernel_avx.c
++++ b/kernel/x86_64/dmul_kernel_avx.c
+@@ -0,0 +1,87 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++#include <immintrin.h>
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
++
++  int i=0;
++
++  while(loop_count>0){
++
++    __m256d av0=_mm256_loadu_pd(a);
++    __m256d av1=_mm256_loadu_pd(a+4);
++    __m256d av2=_mm256_loadu_pd(a+8);
++    __m256d av3=_mm256_loadu_pd(a+12);
++
++    __m256d av4=_mm256_loadu_pd(a+16);
++    __m256d av5=_mm256_loadu_pd(a+20);
++    __m256d av6=_mm256_loadu_pd(a+24);
++    __m256d av7=_mm256_loadu_pd(a+28);
++
++    __m256d bv0=_mm256_loadu_pd(b);
++    __m256d bv1=_mm256_loadu_pd(b+4);
++    __m256d bv2=_mm256_loadu_pd(b+8);
++    __m256d bv3=_mm256_loadu_pd(b+12);
++
++    __m256d bv4=_mm256_loadu_pd(b+16);
++    __m256d bv5=_mm256_loadu_pd(b+20);
++    __m256d bv6=_mm256_loadu_pd(b+24);
++    __m256d bv7=_mm256_loadu_pd(b+28);
++
++
++    __m256d yv0=_mm256_mul_pd(av0, bv0);
++    __m256d yv1=_mm256_mul_pd(av1, bv1);
++    __m256d yv2=_mm256_mul_pd(av2, bv2);
++    __m256d yv3=_mm256_mul_pd(av3, bv3);
++
++    __m256d yv4=_mm256_mul_pd(av4, bv4);
++    __m256d yv5=_mm256_mul_pd(av5, bv5);
++    __m256d yv6=_mm256_mul_pd(av6, bv6);
++    __m256d yv7=_mm256_mul_pd(av7, bv7);
++
++    _mm256_storeu_pd(y, yv0);
++    _mm256_storeu_pd(y+4, yv1);
++    _mm256_storeu_pd(y+8, yv2);
++    _mm256_storeu_pd(y+12, yv3);
++
++    _mm256_storeu_pd(y+16, yv4);
++    _mm256_storeu_pd(y+20, yv5);
++    _mm256_storeu_pd(y+24, yv6);
++    _mm256_storeu_pd(y+28, yv7);
++
++    a+=32;
++    y+=32;
++    loop_count--;
++  }
++
++  for(i=0; i<remain_count; i++){
++    y[i]=a[i]*b[i];
++  }
++}
+diff --git a/kernel/x86_64/mul_kernel.c b/kernel/x86_64/mul_kernel.c
+index e69de29..01b0d95 100644
+--- a/kernel/x86_64/mul_kernel.c
++++ b/kernel/x86_64/mul_kernel.c
+@@ -0,0 +1,33 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG i=0;
++  for(i=0; i<COMPSIZE*n; i++){
++    y[i]=a[i]*b[i];
++  }
++}
+diff --git a/kernel/x86_64/sdiv_kernel_avx.c b/kernel/x86_64/sdiv_kernel_avx.c
+index e69de29..11deae8 100644
+--- a/kernel/x86_64/sdiv_kernel_avx.c
++++ b/kernel/x86_64/sdiv_kernel_avx.c
+@@ -0,0 +1,67 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++#include <immintrin.h>
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
++
++  int i=0;
++
++  while(loop_count>0){
++
++    __m256d av0=_mm256_loadu_ps(a);
++    __m256d av2=_mm256_loadu_ps(a+8);
++    __m256d av4=_mm256_loadu_ps(a+16);
++    __m256d av6=_mm256_loadu_ps(a+24);
++
++    __m256d bv0=_mm256_loadu_ps(b);
++    __m256d bv2=_mm256_loadu_ps(b+8);
++    __m256d bv4=_mm256_loadu_ps(b+16);
++    __m256d bv6=_mm256_loadu_ps(b+24);
++
++
++    __m256d yv0=_mm256_div_pd(av0, bv0);
++    __m256d yv2=_mm256_div_pd(av2, bv2);
++    __m256d yv4=_mm256_div_pd(av4, bv4);
++    __m256d yv6=_mm256_div_pd(av6, bv6);
++
++    _mm256_storeu_pd(y, yv0);
++    _mm256_storeu_pd(y+8, yv2);
++    _mm256_storeu_pd(y+16, yv4);
++    _mm256_storeu_pd(y+24, yv6);
++
++    a+=32;
++    y+=32;
++    loop_count--;
++  }
++
++  for(i=0; i<remain_count; i++){
++    y[i]=a[i]/b[i];
++  }
++}
+diff --git a/kernel/x86_64/smul_kernel_avx.c b/kernel/x86_64/smul_kernel_avx.c
+index e69de29..7a2d922 100644
+--- a/kernel/x86_64/smul_kernel_avx.c
++++ b/kernel/x86_64/smul_kernel_avx.c
+@@ -0,0 +1,67 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++#include <immintrin.h>
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
++
++  int i=0;
++
++  while(loop_count>0){
++
++    __m256d av0=_mm256_loadu_ps(a);
++    __m256d av2=_mm256_loadu_ps(a+8);
++    __m256d av4=_mm256_loadu_ps(a+16);
++    __m256d av6=_mm256_loadu_ps(a+24);
++
++    __m256d bv0=_mm256_loadu_ps(b);
++    __m256d bv2=_mm256_loadu_ps(b+8);
++    __m256d bv4=_mm256_loadu_ps(b+16);
++    __m256d bv6=_mm256_loadu_ps(b+24);
++
++
++    __m256d yv0=_mm256_mul_pd(av0, bv0);
++    __m256d yv2=_mm256_mul_pd(av2, bv2);
++    __m256d yv4=_mm256_mul_pd(av4, bv4);
++    __m256d yv6=_mm256_mul_pd(av6, bv6);
++
++    _mm256_storeu_pd(y, yv0);
++    _mm256_storeu_pd(y+8, yv2);
++    _mm256_storeu_pd(y+16, yv4);
++    _mm256_storeu_pd(y+24, yv6);
++
++    a+=32;
++    y+=32;
++    loop_count--;
++  }
++
++  for(i=0; i<remain_count; i++){
++    y[i]=a[i]*b[i];
++  }
++}
+diff --git a/real_sqr.patch b/real_sqr.patch
+index e69de29..dabc2a0 100644
+--- a/real_sqr.patch
++++ b/real_sqr.patch
+@@ -0,0 +1,761 @@
++From e31e919a962051317db885fe4861972c4d49fd7d Mon Sep 17 00:00:00 2001
++From: xinhuang <xinhuang.abc@gmail.com>
++Date: Sat, 10 Sep 2016 15:09:08 +0800
++Subject: [PATCH 1/2] generic vsSqr
++
++---
++ include/openvml.h           |  2 ++
++ include/openvml_kernel.h    |  1 +
++ include/openvml_macros.h    |  2 ++
++ include/openvml_reference.h |  2 ++
++ kernel/generic/sqr_kernel.c | 33 ++++++++++++++++++++++++
++ test/CMakeLists.txt         |  1 +
++ test/test_sqr.c             | 63 +++++++++++++++++++++++++++++++++++++++++++++
++ 7 files changed, 104 insertions(+)
++ create mode 100644 kernel/generic/sqr_kernel.c
++ create mode 100644 test/test_sqr.c
++
++diff --git a/include/openvml.h b/include/openvml.h
++index 09cc02f..ede1f95 100644
++--- a/include/openvml.h
+++++ b/include/openvml.h
++@@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
+++
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++
++diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
++index f4d8e94..8f2a34e 100644
++--- a/include/openvml_kernel.h
+++++ b/include/openvml_kernel.h
++@@ -41,6 +41,7 @@ void OpenVML_FUNCNAME(dsub_k)(VMLLONG n, double * a, double * b, double * y, dou
++ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
+++void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++
++ void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++diff --git a/include/openvml_macros.h b/include/openvml_macros.h
++index eef53cf..0e7091b 100644
++--- a/include/openvml_macros.h
+++++ b/include/openvml_macros.h
++@@ -43,6 +43,8 @@
++ #define CSUB_K OpenVML_FUNCNAME(csub_k)
++ #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
++
+++#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
+++
++ #define SPOW_K OpenVML_FUNCNAME(spow_k)
++ #define DPOW_K OpenVML_FUNCNAME(dpow_k)
++ #define CPOW_K OpenVML_FUNCNAME(cpow_k)
++diff --git a/include/openvml_reference.h b/include/openvml_reference.h
++index fdb0beb..2af4525 100644
++--- a/include/openvml_reference.h
+++++ b/include/openvml_reference.h
++@@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSub)(const VML_INT n, const double *
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
+++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
+++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++
++diff --git a/kernel/generic/sqr_kernel.c b/kernel/generic/sqr_kernel.c
++new file mode 100644
++index 0000000..225e667
++--- /dev/null
+++++ b/kernel/generic/sqr_kernel.c
++@@ -0,0 +1,33 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG i=0;
+++  for(i=0; i<COMPSIZE*n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
++diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
++index c33cba3..230ef9d 100644
++--- a/test/CMakeLists.txt
+++++ b/test/CMakeLists.txt
++@@ -5,6 +5,7 @@ set(OpenVML_TESTSRC
++   openvml_timer.c
++   test_add.c
++   test_sub.c
+++  test_sqr.c
++   test_pow.c
++   test_powx.c
++   test_pow2o3.c
++diff --git a/test/test_sqr.c b/test/test_sqr.c
++new file mode 100644
++index 0000000..806911a
++--- /dev/null
+++++ b/test/test_sqr.c
++@@ -0,0 +1,63 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "vml_test.h"
+++#include <stdio.h>
+++#include <string.h>
+++#include <openvml_reference.h>
+++
+++static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
+++static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
+++
+++static a_y_func_t ref_vsqr[] = {
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vcSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vzSqr),
+++};
+++
+++static a_y_func_t test_vsqr[] = {
+++  (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vcSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vzSqr),
+++};
+++
+++
+++CTEST2(check_result_s, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_d, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_c, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_z, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
++
++From 5ef9a2fdc9fd96329e5dbfb669139227546c49c2 Mon Sep 17 00:00:00 2001
++From: xinhuang <xinhuang.abc@gmail.com>
++Date: Sat, 10 Sep 2016 16:59:11 +0800
++Subject: [PATCH 2/2] implement v?Sqr as y =__mm256_mul_pd(a, a)
++
++---
++ include/openvml.h                    |  3 +-
++ include/openvml_kernel.h             |  1 +
++ include/openvml_macros.h             |  5 ++-
++ include/openvml_reference.h          |  1 +
++ interface/CMakeLists.txt             |  4 +-
++ interface/sqr.c                      | 39 ++++++++++++++++++
++ kernel/CMakeLists.txt                |  2 +-
++ kernel/aarch64/Kernel_generic.txt    |  3 ++
++ kernel/arm/Kernel_generic.txt        |  3 ++
++ kernel/generic/Kernel_generic.txt    |  3 ++
++ kernel/x86_64/Kernel_generic.txt     |  3 ++
++ kernel/x86_64/Kernel_haswell.txt     |  3 ++
++ kernel/x86_64/Kernel_sandybridge.txt |  3 ++
++ kernel/x86_64/dsqr_kernel_avx.c      | 78 ++++++++++++++++++++++++++++++++++++
++ kernel/x86_64/sqr_kernel.c           | 33 +++++++++++++++
++ kernel/x86_64/ssqr_kernel_avx.c      | 64 +++++++++++++++++++++++++++++
++ reference/CMakeLists.txt             |  3 +-
++ reference/vsqr.c                     | 49 ++++++++++++++++++++++
++ test/test_sqr.c                      | 19 +++------
++ 19 files changed, 300 insertions(+), 19 deletions(-)
++ create mode 100644 interface/sqr.c
++ create mode 100644 kernel/x86_64/dsqr_kernel_avx.c
++ create mode 100644 kernel/x86_64/sqr_kernel.c
++ create mode 100644 kernel/x86_64/ssqr_kernel_avx.c
++ create mode 100644 reference/vsqr.c
++
++diff --git a/include/openvml.h b/include/openvml.h
++index ede1f95..883a480 100644
++--- a/include/openvml.h
+++++ b/include/openvml.h
++@@ -46,7 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
++-OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const float * a, float * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vdSqr)(const VML_INT n, const double * a, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
++index 8f2a34e..fdc87ff 100644
++--- a/include/openvml_kernel.h
+++++ b/include/openvml_kernel.h
++@@ -42,6 +42,7 @@ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float
++ void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
++ void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
+++void OpenVML_FUNCNAME(sdqr_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
++ void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++diff --git a/include/openvml_macros.h b/include/openvml_macros.h
++index 0e7091b..ff8a166 100644
++--- a/include/openvml_macros.h
+++++ b/include/openvml_macros.h
++@@ -43,7 +43,8 @@
++ #define CSUB_K OpenVML_FUNCNAME(csub_k)
++ #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
++
++-#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
+++#define SSQR_K OpenVML_FUNCNAME(ssqr_k)
+++#define DSQR_K OpenVML_FUNCNAME(dsqr_k)
++
++ #define SPOW_K OpenVML_FUNCNAME(spow_k)
++ #define DPOW_K OpenVML_FUNCNAME(dpow_k)
++@@ -116,6 +117,7 @@
++ #ifndef DOUBLE
++ #define ADD_K SADD_K
++ #define SUB_K SSUB_K
+++#define SQR_K SSQR_K
++ #define POW_K SPOW_K
++ #define POWX_K SPOWX_K
++ #define EXP_K SEXP_K
++@@ -136,6 +138,7 @@
++ #else
++ #define ADD_K DADD_K
++ #define SUB_K DSUB_K
+++#define SQR_K DSQR_K
++ #define POW_K DPOW_K
++ #define POWX_K DPOWX_K
++ #define EXP_K DEXP_K
++diff --git a/include/openvml_reference.h b/include/openvml_reference.h
++index 2af4525..773dc2b 100644
++--- a/include/openvml_reference.h
+++++ b/include/openvml_reference.h
++@@ -47,6 +47,7 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++diff --git a/interface/CMakeLists.txt b/interface/CMakeLists.txt
++index de9f6b3..433652c 100644
++--- a/interface/CMakeLists.txt
+++++ b/interface/CMakeLists.txt
++@@ -6,7 +6,7 @@ set(OpenVML_LIBSRC_C "")
++ set(OpenVML_LIBSRC_Z "")
++
++ set(REAL_INTERFACE_LIST
++-  add sub
+++  add sub sqr
++   pow powx pow2o3 pow3o2 exp expm1
++   tanh
++   log10 ln log1p
++@@ -108,4 +108,4 @@ Endforeach(INTERFACE)
++
++ add_library(openvml_interface_core OBJECT ${OpenVML_LIBSRC_S} ${OpenVML_LIBSRC_D} ${OpenVML_LIBSRC_C} ${OpenVML_LIBSRC_Z} ${OpenVML_LIBSRC_OTHER})
++
++-target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
++\ No newline at end of file
+++target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
++diff --git a/interface/sqr.c b/interface/sqr.c
++new file mode 100644
++index 0000000..081b838
++--- /dev/null
+++++ b/interface/sqr.c
++@@ -0,0 +1,39 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include <openvml.h>
+++#include <openvml_driver.h>
+++#include <openvml_kernel.h>
+++
+++
+++void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * y) {
+++
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++
+++  EXEC_VML(0, SQR_K, n, (VML_FLOAT*)a, NULL, y, NULL, NULL);
+++
+++}
++diff --git a/kernel/CMakeLists.txt b/kernel/CMakeLists.txt
++index 51ba9a9..45bb201 100644
++--- a/kernel/CMakeLists.txt
+++++ b/kernel/CMakeLists.txt
++@@ -7,7 +7,7 @@ set(OpenVML_LIBSRC_C "")
++ set(OpenVML_LIBSRC_Z "")
++
++ #s,d
++-set(KERNEL_LIST add sub pow powx exp expm1 tanh log10 ln log1p floor
+++set(KERNEL_LIST add sub sqr pow powx exp expm1 tanh log10 ln log1p floor
++   sin cos sincos tan asin acos atan atan2)
++
++ #c,z
++diff --git a/kernel/aarch64/Kernel_generic.txt b/kernel/aarch64/Kernel_generic.txt
++index 9a15eca..c90b7e6 100644
++--- a/kernel/aarch64/Kernel_generic.txt
+++++ b/kernel/aarch64/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/arm/Kernel_generic.txt b/kernel/arm/Kernel_generic.txt
++index 9a15eca..c90b7e6 100644
++--- a/kernel/arm/Kernel_generic.txt
+++++ b/kernel/arm/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/generic/Kernel_generic.txt b/kernel/generic/Kernel_generic.txt
++index fa9fed5..70c08f2 100644
++--- a/kernel/generic/Kernel_generic.txt
+++++ b/kernel/generic/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++ #set(pow_C_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++diff --git a/kernel/x86_64/Kernel_generic.txt b/kernel/x86_64/Kernel_generic.txt
++index dee6831..0c7244e 100644
++--- a/kernel/x86_64/Kernel_generic.txt
+++++ b/kernel/x86_64/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/x86_64/Kernel_haswell.txt b/kernel/x86_64/Kernel_haswell.txt
++index 81fd684..63f42d6 100644
++--- a/kernel/x86_64/Kernel_haswell.txt
+++++ b/kernel/x86_64/Kernel_haswell.txt
++@@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
++
++diff --git a/kernel/x86_64/Kernel_sandybridge.txt b/kernel/x86_64/Kernel_sandybridge.txt
++index 55e5a05..3e33a1c 100644
++--- a/kernel/x86_64/Kernel_sandybridge.txt
+++++ b/kernel/x86_64/Kernel_sandybridge.txt
++@@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
++
++diff --git a/kernel/x86_64/dsqr_kernel_avx.c b/kernel/x86_64/dsqr_kernel_avx.c
++new file mode 100644
++index 0000000..9a94e47
++--- /dev/null
+++++ b/kernel/x86_64/dsqr_kernel_avx.c
++@@ -0,0 +1,78 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++#include <immintrin.h>
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
+++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
+++
+++  int i=0;
+++
+++  while(loop_count>0){
+++
+++    __m256d av0=_mm256_loadu_pd(a);
+++    __m256d av1=_mm256_loadu_pd(a+4);
+++    __m256d av2=_mm256_loadu_pd(a+8);
+++    __m256d av3=_mm256_loadu_pd(a+12);
+++
+++    __m256d av4=_mm256_loadu_pd(a+16);
+++    __m256d av5=_mm256_loadu_pd(a+20);
+++    __m256d av6=_mm256_loadu_pd(a+24);
+++    __m256d av7=_mm256_loadu_pd(a+28);
+++
+++
+++    __m256d yv0=_mm256_mul_pd(av0, av0);
+++    __m256d yv1=_mm256_mul_pd(av1, av1);
+++    __m256d yv2=_mm256_mul_pd(av2, av2);
+++    __m256d yv3=_mm256_mul_pd(av3, av3);
+++
+++    __m256d yv4=_mm256_mul_pd(av4, av4);
+++    __m256d yv5=_mm256_mul_pd(av5, av5);
+++    __m256d yv6=_mm256_mul_pd(av6, av6);
+++    __m256d yv7=_mm256_mul_pd(av7, av7);
+++
+++    _mm256_storeu_pd(y, yv0);
+++    _mm256_storeu_pd(y+4, yv1);
+++    _mm256_storeu_pd(y+8, yv2);
+++    _mm256_storeu_pd(y+12, yv3);
+++
+++    _mm256_storeu_pd(y+16, yv4);
+++    _mm256_storeu_pd(y+20, yv5);
+++    _mm256_storeu_pd(y+24, yv6);
+++    _mm256_storeu_pd(y+28, yv7);
+++
+++    a+=32;
+++    y+=32;
+++    loop_count--;
+++  }
+++
+++  for(i=0; i<remain_count; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/kernel/x86_64/sqr_kernel.c b/kernel/x86_64/sqr_kernel.c
++new file mode 100644
++index 0000000..225e667
++--- /dev/null
+++++ b/kernel/x86_64/sqr_kernel.c
++@@ -0,0 +1,33 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG i=0;
+++  for(i=0; i<COMPSIZE*n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
++diff --git a/kernel/x86_64/ssqr_kernel_avx.c b/kernel/x86_64/ssqr_kernel_avx.c
++new file mode 100644
++index 0000000..3238d5e
++--- /dev/null
+++++ b/kernel/x86_64/ssqr_kernel_avx.c
++@@ -0,0 +1,64 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++#include <immintrin.h>
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
+++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
+++
+++  int i=0;
+++
+++  while(loop_count>0){
+++
+++    __m256 av0=_mm256_loadu_ps(a);
+++    __m256 av1=_mm256_loadu_ps(a+8);
+++    __m256 av2=_mm256_loadu_ps(a+16);
+++    __m256 av3=_mm256_loadu_ps(a+24);
+++
+++
+++    __m256 yv0=_mm256_mul_ps(av0, av0);
+++    __m256 yv1=_mm256_mul_ps(av1, av1);
+++    __m256 yv2=_mm256_mul_ps(av2, av2);
+++    __m256 yv3=_mm256_mul_ps(av3, av3);
+++
+++
+++    _mm256_storeu_ps(y, yv0);
+++    _mm256_storeu_ps(y+8, yv1);
+++    _mm256_storeu_ps(y+16, yv2);
+++    _mm256_storeu_ps(y+24, yv3);
+++
+++    a+=32;
+++    y+=32;
+++    loop_count--;
+++  }
+++
+++  for(i=0; i<remain_count; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/reference/CMakeLists.txt b/reference/CMakeLists.txt
++index dddc5db..4acb0c8 100644
++--- a/reference/CMakeLists.txt
+++++ b/reference/CMakeLists.txt
++@@ -1,6 +1,7 @@
++ set(OpenVML_REF_SRC
++   vadd.c
++   vsub.c
+++  vsqr.c
++   vpow.c
++   vpowx.c
++   vpow2o3.c
++@@ -27,4 +28,4 @@ if(NOT MSVC)
++ target_link_libraries(${OpenVML_LIBNAME}_ref m)
++ endif()
++
++-target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
++\ No newline at end of file
+++target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
++diff --git a/reference/vsqr.c b/reference/vsqr.c
++new file mode 100644
++index 0000000..35bf1b8
++--- /dev/null
+++++ b/reference/vsqr.c
++@@ -0,0 +1,49 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include <stdlib.h>
+++#include <math.h>
+++#include <openvml_reference.h>
+++
+++void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y){
+++  VML_INT i;
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++  for(i=0; i<n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
+++void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y){
+++  VML_INT i;
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++  for(i=0; i<n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/test/test_sqr.c b/test/test_sqr.c
++index 806911a..bd45d41 100644
++--- a/test/test_sqr.c
+++++ b/test/test_sqr.c
++@@ -28,21 +28,21 @@
++ #include <string.h>
++ #include <openvml_reference.h>
++
++-static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
++-static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
+++static char* funcname[4]={"vsSqr", "vdSqr", NULL, NULL};
+++static double flop_per_elem[4]={1.0, 1.0, 0, 0};
++
++ static a_y_func_t ref_vsqr[] = {
++   (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
++   (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME_REF(vcSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME_REF(vzSqr),
+++  NULL,
+++  NULL,
++ };
++
++ static a_y_func_t test_vsqr[] = {
++   (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
++   (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME(vcSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME(vzSqr),
+++  NULL,
+++  NULL,
++ };
++
++
++@@ -54,10 +54,3 @@ CTEST2(check_result_d, sqr){
++   run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++ }
++
++-CTEST2(check_result_c, sqr){
++-  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++-}
++-
++-CTEST2(check_result_z, sqr){
++-  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++-}
+diff --git a/real_sqr0.patch b/real_sqr0.patch
+index e69de29..dabc2a0 100644
+--- a/real_sqr0.patch
++++ b/real_sqr0.patch
+@@ -0,0 +1,761 @@
++From e31e919a962051317db885fe4861972c4d49fd7d Mon Sep 17 00:00:00 2001
++From: xinhuang <xinhuang.abc@gmail.com>
++Date: Sat, 10 Sep 2016 15:09:08 +0800
++Subject: [PATCH 1/2] generic vsSqr
++
++---
++ include/openvml.h           |  2 ++
++ include/openvml_kernel.h    |  1 +
++ include/openvml_macros.h    |  2 ++
++ include/openvml_reference.h |  2 ++
++ kernel/generic/sqr_kernel.c | 33 ++++++++++++++++++++++++
++ test/CMakeLists.txt         |  1 +
++ test/test_sqr.c             | 63 +++++++++++++++++++++++++++++++++++++++++++++
++ 7 files changed, 104 insertions(+)
++ create mode 100644 kernel/generic/sqr_kernel.c
++ create mode 100644 test/test_sqr.c
++
++diff --git a/include/openvml.h b/include/openvml.h
++index 09cc02f..ede1f95 100644
++--- a/include/openvml.h
+++++ b/include/openvml.h
++@@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
+++
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++
++diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
++index f4d8e94..8f2a34e 100644
++--- a/include/openvml_kernel.h
+++++ b/include/openvml_kernel.h
++@@ -41,6 +41,7 @@ void OpenVML_FUNCNAME(dsub_k)(VMLLONG n, double * a, double * b, double * y, dou
++ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
+++void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++
++ void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++diff --git a/include/openvml_macros.h b/include/openvml_macros.h
++index eef53cf..0e7091b 100644
++--- a/include/openvml_macros.h
+++++ b/include/openvml_macros.h
++@@ -43,6 +43,8 @@
++ #define CSUB_K OpenVML_FUNCNAME(csub_k)
++ #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
++
+++#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
+++
++ #define SPOW_K OpenVML_FUNCNAME(spow_k)
++ #define DPOW_K OpenVML_FUNCNAME(dpow_k)
++ #define CPOW_K OpenVML_FUNCNAME(cpow_k)
++diff --git a/include/openvml_reference.h b/include/openvml_reference.h
++index fdb0beb..2af4525 100644
++--- a/include/openvml_reference.h
+++++ b/include/openvml_reference.h
++@@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSub)(const VML_INT n, const double *
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
+++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
+++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++
++diff --git a/kernel/generic/sqr_kernel.c b/kernel/generic/sqr_kernel.c
++new file mode 100644
++index 0000000..225e667
++--- /dev/null
+++++ b/kernel/generic/sqr_kernel.c
++@@ -0,0 +1,33 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG i=0;
+++  for(i=0; i<COMPSIZE*n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
++diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
++index c33cba3..230ef9d 100644
++--- a/test/CMakeLists.txt
+++++ b/test/CMakeLists.txt
++@@ -5,6 +5,7 @@ set(OpenVML_TESTSRC
++   openvml_timer.c
++   test_add.c
++   test_sub.c
+++  test_sqr.c
++   test_pow.c
++   test_powx.c
++   test_pow2o3.c
++diff --git a/test/test_sqr.c b/test/test_sqr.c
++new file mode 100644
++index 0000000..806911a
++--- /dev/null
+++++ b/test/test_sqr.c
++@@ -0,0 +1,63 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "vml_test.h"
+++#include <stdio.h>
+++#include <string.h>
+++#include <openvml_reference.h>
+++
+++static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
+++static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
+++
+++static a_y_func_t ref_vsqr[] = {
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vcSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vzSqr),
+++};
+++
+++static a_y_func_t test_vsqr[] = {
+++  (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vcSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vzSqr),
+++};
+++
+++
+++CTEST2(check_result_s, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_d, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_c, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_z, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
++
++From 5ef9a2fdc9fd96329e5dbfb669139227546c49c2 Mon Sep 17 00:00:00 2001
++From: xinhuang <xinhuang.abc@gmail.com>
++Date: Sat, 10 Sep 2016 16:59:11 +0800
++Subject: [PATCH 2/2] implement v?Sqr as y =__mm256_mul_pd(a, a)
++
++---
++ include/openvml.h                    |  3 +-
++ include/openvml_kernel.h             |  1 +
++ include/openvml_macros.h             |  5 ++-
++ include/openvml_reference.h          |  1 +
++ interface/CMakeLists.txt             |  4 +-
++ interface/sqr.c                      | 39 ++++++++++++++++++
++ kernel/CMakeLists.txt                |  2 +-
++ kernel/aarch64/Kernel_generic.txt    |  3 ++
++ kernel/arm/Kernel_generic.txt        |  3 ++
++ kernel/generic/Kernel_generic.txt    |  3 ++
++ kernel/x86_64/Kernel_generic.txt     |  3 ++
++ kernel/x86_64/Kernel_haswell.txt     |  3 ++
++ kernel/x86_64/Kernel_sandybridge.txt |  3 ++
++ kernel/x86_64/dsqr_kernel_avx.c      | 78 ++++++++++++++++++++++++++++++++++++
++ kernel/x86_64/sqr_kernel.c           | 33 +++++++++++++++
++ kernel/x86_64/ssqr_kernel_avx.c      | 64 +++++++++++++++++++++++++++++
++ reference/CMakeLists.txt             |  3 +-
++ reference/vsqr.c                     | 49 ++++++++++++++++++++++
++ test/test_sqr.c                      | 19 +++------
++ 19 files changed, 300 insertions(+), 19 deletions(-)
++ create mode 100644 interface/sqr.c
++ create mode 100644 kernel/x86_64/dsqr_kernel_avx.c
++ create mode 100644 kernel/x86_64/sqr_kernel.c
++ create mode 100644 kernel/x86_64/ssqr_kernel_avx.c
++ create mode 100644 reference/vsqr.c
++
++diff --git a/include/openvml.h b/include/openvml.h
++index ede1f95..883a480 100644
++--- a/include/openvml.h
+++++ b/include/openvml.h
++@@ -46,7 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
++-OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const float * a, float * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vdSqr)(const VML_INT n, const double * a, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
++index 8f2a34e..fdc87ff 100644
++--- a/include/openvml_kernel.h
+++++ b/include/openvml_kernel.h
++@@ -42,6 +42,7 @@ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float
++ void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
++ void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
+++void OpenVML_FUNCNAME(sdqr_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
++ void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++diff --git a/include/openvml_macros.h b/include/openvml_macros.h
++index 0e7091b..ff8a166 100644
++--- a/include/openvml_macros.h
+++++ b/include/openvml_macros.h
++@@ -43,7 +43,8 @@
++ #define CSUB_K OpenVML_FUNCNAME(csub_k)
++ #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
++
++-#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
+++#define SSQR_K OpenVML_FUNCNAME(ssqr_k)
+++#define DSQR_K OpenVML_FUNCNAME(dsqr_k)
++
++ #define SPOW_K OpenVML_FUNCNAME(spow_k)
++ #define DPOW_K OpenVML_FUNCNAME(dpow_k)
++@@ -116,6 +117,7 @@
++ #ifndef DOUBLE
++ #define ADD_K SADD_K
++ #define SUB_K SSUB_K
+++#define SQR_K SSQR_K
++ #define POW_K SPOW_K
++ #define POWX_K SPOWX_K
++ #define EXP_K SEXP_K
++@@ -136,6 +138,7 @@
++ #else
++ #define ADD_K DADD_K
++ #define SUB_K DSUB_K
+++#define SQR_K DSQR_K
++ #define POW_K DPOW_K
++ #define POWX_K DPOWX_K
++ #define EXP_K DEXP_K
++diff --git a/include/openvml_reference.h b/include/openvml_reference.h
++index 2af4525..773dc2b 100644
++--- a/include/openvml_reference.h
+++++ b/include/openvml_reference.h
++@@ -47,6 +47,7 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++diff --git a/interface/CMakeLists.txt b/interface/CMakeLists.txt
++index de9f6b3..433652c 100644
++--- a/interface/CMakeLists.txt
+++++ b/interface/CMakeLists.txt
++@@ -6,7 +6,7 @@ set(OpenVML_LIBSRC_C "")
++ set(OpenVML_LIBSRC_Z "")
++
++ set(REAL_INTERFACE_LIST
++-  add sub
+++  add sub sqr
++   pow powx pow2o3 pow3o2 exp expm1
++   tanh
++   log10 ln log1p
++@@ -108,4 +108,4 @@ Endforeach(INTERFACE)
++
++ add_library(openvml_interface_core OBJECT ${OpenVML_LIBSRC_S} ${OpenVML_LIBSRC_D} ${OpenVML_LIBSRC_C} ${OpenVML_LIBSRC_Z} ${OpenVML_LIBSRC_OTHER})
++
++-target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
++\ No newline at end of file
+++target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
++diff --git a/interface/sqr.c b/interface/sqr.c
++new file mode 100644
++index 0000000..081b838
++--- /dev/null
+++++ b/interface/sqr.c
++@@ -0,0 +1,39 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include <openvml.h>
+++#include <openvml_driver.h>
+++#include <openvml_kernel.h>
+++
+++
+++void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * y) {
+++
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++
+++  EXEC_VML(0, SQR_K, n, (VML_FLOAT*)a, NULL, y, NULL, NULL);
+++
+++}
++diff --git a/kernel/CMakeLists.txt b/kernel/CMakeLists.txt
++index 51ba9a9..45bb201 100644
++--- a/kernel/CMakeLists.txt
+++++ b/kernel/CMakeLists.txt
++@@ -7,7 +7,7 @@ set(OpenVML_LIBSRC_C "")
++ set(OpenVML_LIBSRC_Z "")
++
++ #s,d
++-set(KERNEL_LIST add sub pow powx exp expm1 tanh log10 ln log1p floor
+++set(KERNEL_LIST add sub sqr pow powx exp expm1 tanh log10 ln log1p floor
++   sin cos sincos tan asin acos atan atan2)
++
++ #c,z
++diff --git a/kernel/aarch64/Kernel_generic.txt b/kernel/aarch64/Kernel_generic.txt
++index 9a15eca..c90b7e6 100644
++--- a/kernel/aarch64/Kernel_generic.txt
+++++ b/kernel/aarch64/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/arm/Kernel_generic.txt b/kernel/arm/Kernel_generic.txt
++index 9a15eca..c90b7e6 100644
++--- a/kernel/arm/Kernel_generic.txt
+++++ b/kernel/arm/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/generic/Kernel_generic.txt b/kernel/generic/Kernel_generic.txt
++index fa9fed5..70c08f2 100644
++--- a/kernel/generic/Kernel_generic.txt
+++++ b/kernel/generic/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++ #set(pow_C_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++diff --git a/kernel/x86_64/Kernel_generic.txt b/kernel/x86_64/Kernel_generic.txt
++index dee6831..0c7244e 100644
++--- a/kernel/x86_64/Kernel_generic.txt
+++++ b/kernel/x86_64/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/x86_64/Kernel_haswell.txt b/kernel/x86_64/Kernel_haswell.txt
++index 81fd684..63f42d6 100644
++--- a/kernel/x86_64/Kernel_haswell.txt
+++++ b/kernel/x86_64/Kernel_haswell.txt
++@@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
++
++diff --git a/kernel/x86_64/Kernel_sandybridge.txt b/kernel/x86_64/Kernel_sandybridge.txt
++index 55e5a05..3e33a1c 100644
++--- a/kernel/x86_64/Kernel_sandybridge.txt
+++++ b/kernel/x86_64/Kernel_sandybridge.txt
++@@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
++
++diff --git a/kernel/x86_64/dsqr_kernel_avx.c b/kernel/x86_64/dsqr_kernel_avx.c
++new file mode 100644
++index 0000000..9a94e47
++--- /dev/null
+++++ b/kernel/x86_64/dsqr_kernel_avx.c
++@@ -0,0 +1,78 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++#include <immintrin.h>
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
+++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
+++
+++  int i=0;
+++
+++  while(loop_count>0){
+++
+++    __m256d av0=_mm256_loadu_pd(a);
+++    __m256d av1=_mm256_loadu_pd(a+4);
+++    __m256d av2=_mm256_loadu_pd(a+8);
+++    __m256d av3=_mm256_loadu_pd(a+12);
+++
+++    __m256d av4=_mm256_loadu_pd(a+16);
+++    __m256d av5=_mm256_loadu_pd(a+20);
+++    __m256d av6=_mm256_loadu_pd(a+24);
+++    __m256d av7=_mm256_loadu_pd(a+28);
+++
+++
+++    __m256d yv0=_mm256_mul_pd(av0, av0);
+++    __m256d yv1=_mm256_mul_pd(av1, av1);
+++    __m256d yv2=_mm256_mul_pd(av2, av2);
+++    __m256d yv3=_mm256_mul_pd(av3, av3);
+++
+++    __m256d yv4=_mm256_mul_pd(av4, av4);
+++    __m256d yv5=_mm256_mul_pd(av5, av5);
+++    __m256d yv6=_mm256_mul_pd(av6, av6);
+++    __m256d yv7=_mm256_mul_pd(av7, av7);
+++
+++    _mm256_storeu_pd(y, yv0);
+++    _mm256_storeu_pd(y+4, yv1);
+++    _mm256_storeu_pd(y+8, yv2);
+++    _mm256_storeu_pd(y+12, yv3);
+++
+++    _mm256_storeu_pd(y+16, yv4);
+++    _mm256_storeu_pd(y+20, yv5);
+++    _mm256_storeu_pd(y+24, yv6);
+++    _mm256_storeu_pd(y+28, yv7);
+++
+++    a+=32;
+++    y+=32;
+++    loop_count--;
+++  }
+++
+++  for(i=0; i<remain_count; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/kernel/x86_64/sqr_kernel.c b/kernel/x86_64/sqr_kernel.c
++new file mode 100644
++index 0000000..225e667
++--- /dev/null
+++++ b/kernel/x86_64/sqr_kernel.c
++@@ -0,0 +1,33 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG i=0;
+++  for(i=0; i<COMPSIZE*n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
++diff --git a/kernel/x86_64/ssqr_kernel_avx.c b/kernel/x86_64/ssqr_kernel_avx.c
++new file mode 100644
++index 0000000..3238d5e
++--- /dev/null
+++++ b/kernel/x86_64/ssqr_kernel_avx.c
++@@ -0,0 +1,64 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++#include <immintrin.h>
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
+++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
+++
+++  int i=0;
+++
+++  while(loop_count>0){
+++
+++    __m256 av0=_mm256_loadu_ps(a);
+++    __m256 av1=_mm256_loadu_ps(a+8);
+++    __m256 av2=_mm256_loadu_ps(a+16);
+++    __m256 av3=_mm256_loadu_ps(a+24);
+++
+++
+++    __m256 yv0=_mm256_mul_ps(av0, av0);
+++    __m256 yv1=_mm256_mul_ps(av1, av1);
+++    __m256 yv2=_mm256_mul_ps(av2, av2);
+++    __m256 yv3=_mm256_mul_ps(av3, av3);
+++
+++
+++    _mm256_storeu_ps(y, yv0);
+++    _mm256_storeu_ps(y+8, yv1);
+++    _mm256_storeu_ps(y+16, yv2);
+++    _mm256_storeu_ps(y+24, yv3);
+++
+++    a+=32;
+++    y+=32;
+++    loop_count--;
+++  }
+++
+++  for(i=0; i<remain_count; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/reference/CMakeLists.txt b/reference/CMakeLists.txt
++index dddc5db..4acb0c8 100644
++--- a/reference/CMakeLists.txt
+++++ b/reference/CMakeLists.txt
++@@ -1,6 +1,7 @@
++ set(OpenVML_REF_SRC
++   vadd.c
++   vsub.c
+++  vsqr.c
++   vpow.c
++   vpowx.c
++   vpow2o3.c
++@@ -27,4 +28,4 @@ if(NOT MSVC)
++ target_link_libraries(${OpenVML_LIBNAME}_ref m)
++ endif()
++
++-target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
++\ No newline at end of file
+++target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
++diff --git a/reference/vsqr.c b/reference/vsqr.c
++new file mode 100644
++index 0000000..35bf1b8
++--- /dev/null
+++++ b/reference/vsqr.c
++@@ -0,0 +1,49 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include <stdlib.h>
+++#include <math.h>
+++#include <openvml_reference.h>
+++
+++void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y){
+++  VML_INT i;
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++  for(i=0; i<n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
+++void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y){
+++  VML_INT i;
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++  for(i=0; i<n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/test/test_sqr.c b/test/test_sqr.c
++index 806911a..bd45d41 100644
++--- a/test/test_sqr.c
+++++ b/test/test_sqr.c
++@@ -28,21 +28,21 @@
++ #include <string.h>
++ #include <openvml_reference.h>
++
++-static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
++-static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
+++static char* funcname[4]={"vsSqr", "vdSqr", NULL, NULL};
+++static double flop_per_elem[4]={1.0, 1.0, 0, 0};
++
++ static a_y_func_t ref_vsqr[] = {
++   (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
++   (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME_REF(vcSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME_REF(vzSqr),
+++  NULL,
+++  NULL,
++ };
++
++ static a_y_func_t test_vsqr[] = {
++   (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
++   (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME(vcSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME(vzSqr),
+++  NULL,
+++  NULL,
++ };
++
++
++@@ -54,10 +54,3 @@ CTEST2(check_result_d, sqr){
++   run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++ }
++
++-CTEST2(check_result_c, sqr){
++-  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++-}
++-
++-CTEST2(check_result_z, sqr){
++-  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++-}
+diff --git a/real_sqr1.patch b/real_sqr1.patch
+index e69de29..dabc2a0 100644
+--- a/real_sqr1.patch
++++ b/real_sqr1.patch
+@@ -0,0 +1,761 @@
++From e31e919a962051317db885fe4861972c4d49fd7d Mon Sep 17 00:00:00 2001
++From: xinhuang <xinhuang.abc@gmail.com>
++Date: Sat, 10 Sep 2016 15:09:08 +0800
++Subject: [PATCH 1/2] generic vsSqr
++
++---
++ include/openvml.h           |  2 ++
++ include/openvml_kernel.h    |  1 +
++ include/openvml_macros.h    |  2 ++
++ include/openvml_reference.h |  2 ++
++ kernel/generic/sqr_kernel.c | 33 ++++++++++++++++++++++++
++ test/CMakeLists.txt         |  1 +
++ test/test_sqr.c             | 63 +++++++++++++++++++++++++++++++++++++++++++++
++ 7 files changed, 104 insertions(+)
++ create mode 100644 kernel/generic/sqr_kernel.c
++ create mode 100644 test/test_sqr.c
++
++diff --git a/include/openvml.h b/include/openvml.h
++index 09cc02f..ede1f95 100644
++--- a/include/openvml.h
+++++ b/include/openvml.h
++@@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
+++
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++
++diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
++index f4d8e94..8f2a34e 100644
++--- a/include/openvml_kernel.h
+++++ b/include/openvml_kernel.h
++@@ -41,6 +41,7 @@ void OpenVML_FUNCNAME(dsub_k)(VMLLONG n, double * a, double * b, double * y, dou
++ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
+++void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++
++ void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++diff --git a/include/openvml_macros.h b/include/openvml_macros.h
++index eef53cf..0e7091b 100644
++--- a/include/openvml_macros.h
+++++ b/include/openvml_macros.h
++@@ -43,6 +43,8 @@
++ #define CSUB_K OpenVML_FUNCNAME(csub_k)
++ #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
++
+++#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
+++
++ #define SPOW_K OpenVML_FUNCNAME(spow_k)
++ #define DPOW_K OpenVML_FUNCNAME(dpow_k)
++ #define CPOW_K OpenVML_FUNCNAME(cpow_k)
++diff --git a/include/openvml_reference.h b/include/openvml_reference.h
++index fdb0beb..2af4525 100644
++--- a/include/openvml_reference.h
+++++ b/include/openvml_reference.h
++@@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSub)(const VML_INT n, const double *
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
+++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
+++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++
++diff --git a/kernel/generic/sqr_kernel.c b/kernel/generic/sqr_kernel.c
++new file mode 100644
++index 0000000..225e667
++--- /dev/null
+++++ b/kernel/generic/sqr_kernel.c
++@@ -0,0 +1,33 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG i=0;
+++  for(i=0; i<COMPSIZE*n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
++diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
++index c33cba3..230ef9d 100644
++--- a/test/CMakeLists.txt
+++++ b/test/CMakeLists.txt
++@@ -5,6 +5,7 @@ set(OpenVML_TESTSRC
++   openvml_timer.c
++   test_add.c
++   test_sub.c
+++  test_sqr.c
++   test_pow.c
++   test_powx.c
++   test_pow2o3.c
++diff --git a/test/test_sqr.c b/test/test_sqr.c
++new file mode 100644
++index 0000000..806911a
++--- /dev/null
+++++ b/test/test_sqr.c
++@@ -0,0 +1,63 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "vml_test.h"
+++#include <stdio.h>
+++#include <string.h>
+++#include <openvml_reference.h>
+++
+++static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
+++static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
+++
+++static a_y_func_t ref_vsqr[] = {
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vcSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME_REF(vzSqr),
+++};
+++
+++static a_y_func_t test_vsqr[] = {
+++  (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vcSqr),
+++  (a_y_func_t)OpenVML_FUNCNAME(vzSqr),
+++};
+++
+++
+++CTEST2(check_result_s, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_d, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_c, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
+++
+++CTEST2(check_result_z, sqr){
+++  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
+++}
++
++From 5ef9a2fdc9fd96329e5dbfb669139227546c49c2 Mon Sep 17 00:00:00 2001
++From: xinhuang <xinhuang.abc@gmail.com>
++Date: Sat, 10 Sep 2016 16:59:11 +0800
++Subject: [PATCH 2/2] implement v?Sqr as y =__mm256_mul_pd(a, a)
++
++---
++ include/openvml.h                    |  3 +-
++ include/openvml_kernel.h             |  1 +
++ include/openvml_macros.h             |  5 ++-
++ include/openvml_reference.h          |  1 +
++ interface/CMakeLists.txt             |  4 +-
++ interface/sqr.c                      | 39 ++++++++++++++++++
++ kernel/CMakeLists.txt                |  2 +-
++ kernel/aarch64/Kernel_generic.txt    |  3 ++
++ kernel/arm/Kernel_generic.txt        |  3 ++
++ kernel/generic/Kernel_generic.txt    |  3 ++
++ kernel/x86_64/Kernel_generic.txt     |  3 ++
++ kernel/x86_64/Kernel_haswell.txt     |  3 ++
++ kernel/x86_64/Kernel_sandybridge.txt |  3 ++
++ kernel/x86_64/dsqr_kernel_avx.c      | 78 ++++++++++++++++++++++++++++++++++++
++ kernel/x86_64/sqr_kernel.c           | 33 +++++++++++++++
++ kernel/x86_64/ssqr_kernel_avx.c      | 64 +++++++++++++++++++++++++++++
++ reference/CMakeLists.txt             |  3 +-
++ reference/vsqr.c                     | 49 ++++++++++++++++++++++
++ test/test_sqr.c                      | 19 +++------
++ 19 files changed, 300 insertions(+), 19 deletions(-)
++ create mode 100644 interface/sqr.c
++ create mode 100644 kernel/x86_64/dsqr_kernel_avx.c
++ create mode 100644 kernel/x86_64/sqr_kernel.c
++ create mode 100644 kernel/x86_64/ssqr_kernel_avx.c
++ create mode 100644 reference/vsqr.c
++
++diff --git a/include/openvml.h b/include/openvml.h
++index ede1f95..883a480 100644
++--- a/include/openvml.h
+++++ b/include/openvml.h
++@@ -46,7 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
++-OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const float * a, float * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME(vdSqr)(const VML_INT n, const double * a, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
++index 8f2a34e..fdc87ff 100644
++--- a/include/openvml_kernel.h
+++++ b/include/openvml_kernel.h
++@@ -42,6 +42,7 @@ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float
++ void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
++ void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
+++void OpenVML_FUNCNAME(sdqr_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++
++ void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++ void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
++diff --git a/include/openvml_macros.h b/include/openvml_macros.h
++index 0e7091b..ff8a166 100644
++--- a/include/openvml_macros.h
+++++ b/include/openvml_macros.h
++@@ -43,7 +43,8 @@
++ #define CSUB_K OpenVML_FUNCNAME(csub_k)
++ #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
++
++-#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
+++#define SSQR_K OpenVML_FUNCNAME(ssqr_k)
+++#define DSQR_K OpenVML_FUNCNAME(dsqr_k)
++
++ #define SPOW_K OpenVML_FUNCNAME(spow_k)
++ #define DPOW_K OpenVML_FUNCNAME(dpow_k)
++@@ -116,6 +117,7 @@
++ #ifndef DOUBLE
++ #define ADD_K SADD_K
++ #define SUB_K SSUB_K
+++#define SQR_K SSQR_K
++ #define POW_K SPOW_K
++ #define POWX_K SPOWX_K
++ #define EXP_K SEXP_K
++@@ -136,6 +138,7 @@
++ #else
++ #define ADD_K DADD_K
++ #define SUB_K DSUB_K
+++#define SQR_K DSQR_K
++ #define POW_K DPOW_K
++ #define POWX_K DPOWX_K
++ #define EXP_K DEXP_K
++diff --git a/include/openvml_reference.h b/include/openvml_reference.h
++index 2af4525..773dc2b 100644
++--- a/include/openvml_reference.h
+++++ b/include/openvml_reference.h
++@@ -47,6 +47,7 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
+++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y);
++
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
++ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
++diff --git a/interface/CMakeLists.txt b/interface/CMakeLists.txt
++index de9f6b3..433652c 100644
++--- a/interface/CMakeLists.txt
+++++ b/interface/CMakeLists.txt
++@@ -6,7 +6,7 @@ set(OpenVML_LIBSRC_C "")
++ set(OpenVML_LIBSRC_Z "")
++
++ set(REAL_INTERFACE_LIST
++-  add sub
+++  add sub sqr
++   pow powx pow2o3 pow3o2 exp expm1
++   tanh
++   log10 ln log1p
++@@ -108,4 +108,4 @@ Endforeach(INTERFACE)
++
++ add_library(openvml_interface_core OBJECT ${OpenVML_LIBSRC_S} ${OpenVML_LIBSRC_D} ${OpenVML_LIBSRC_C} ${OpenVML_LIBSRC_Z} ${OpenVML_LIBSRC_OTHER})
++
++-target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
++\ No newline at end of file
+++target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
++diff --git a/interface/sqr.c b/interface/sqr.c
++new file mode 100644
++index 0000000..081b838
++--- /dev/null
+++++ b/interface/sqr.c
++@@ -0,0 +1,39 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include <openvml.h>
+++#include <openvml_driver.h>
+++#include <openvml_kernel.h>
+++
+++
+++void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * y) {
+++
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++
+++  EXEC_VML(0, SQR_K, n, (VML_FLOAT*)a, NULL, y, NULL, NULL);
+++
+++}
++diff --git a/kernel/CMakeLists.txt b/kernel/CMakeLists.txt
++index 51ba9a9..45bb201 100644
++--- a/kernel/CMakeLists.txt
+++++ b/kernel/CMakeLists.txt
++@@ -7,7 +7,7 @@ set(OpenVML_LIBSRC_C "")
++ set(OpenVML_LIBSRC_Z "")
++
++ #s,d
++-set(KERNEL_LIST add sub pow powx exp expm1 tanh log10 ln log1p floor
+++set(KERNEL_LIST add sub sqr pow powx exp expm1 tanh log10 ln log1p floor
++   sin cos sincos tan asin acos atan atan2)
++
++ #c,z
++diff --git a/kernel/aarch64/Kernel_generic.txt b/kernel/aarch64/Kernel_generic.txt
++index 9a15eca..c90b7e6 100644
++--- a/kernel/aarch64/Kernel_generic.txt
+++++ b/kernel/aarch64/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/arm/Kernel_generic.txt b/kernel/arm/Kernel_generic.txt
++index 9a15eca..c90b7e6 100644
++--- a/kernel/arm/Kernel_generic.txt
+++++ b/kernel/arm/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/generic/Kernel_generic.txt b/kernel/generic/Kernel_generic.txt
++index fa9fed5..70c08f2 100644
++--- a/kernel/generic/Kernel_generic.txt
+++++ b/kernel/generic/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++ #set(pow_C_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
++diff --git a/kernel/x86_64/Kernel_generic.txt b/kernel/x86_64/Kernel_generic.txt
++index dee6831..0c7244e 100644
++--- a/kernel/x86_64/Kernel_generic.txt
+++++ b/kernel/x86_64/Kernel_generic.txt
++@@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
++ set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
++
+++set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
+++set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
+++
++ set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
++ set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
++
++diff --git a/kernel/x86_64/Kernel_haswell.txt b/kernel/x86_64/Kernel_haswell.txt
++index 81fd684..63f42d6 100644
++--- a/kernel/x86_64/Kernel_haswell.txt
+++++ b/kernel/x86_64/Kernel_haswell.txt
++@@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
++
++diff --git a/kernel/x86_64/Kernel_sandybridge.txt b/kernel/x86_64/Kernel_sandybridge.txt
++index 55e5a05..3e33a1c 100644
++--- a/kernel/x86_64/Kernel_sandybridge.txt
+++++ b/kernel/x86_64/Kernel_sandybridge.txt
++@@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++ set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
++ set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
++
+++set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
+++set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
+++
++ set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
++ set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
++
++diff --git a/kernel/x86_64/dsqr_kernel_avx.c b/kernel/x86_64/dsqr_kernel_avx.c
++new file mode 100644
++index 0000000..9a94e47
++--- /dev/null
+++++ b/kernel/x86_64/dsqr_kernel_avx.c
++@@ -0,0 +1,78 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++#include <immintrin.h>
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
+++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
+++
+++  int i=0;
+++
+++  while(loop_count>0){
+++
+++    __m256d av0=_mm256_loadu_pd(a);
+++    __m256d av1=_mm256_loadu_pd(a+4);
+++    __m256d av2=_mm256_loadu_pd(a+8);
+++    __m256d av3=_mm256_loadu_pd(a+12);
+++
+++    __m256d av4=_mm256_loadu_pd(a+16);
+++    __m256d av5=_mm256_loadu_pd(a+20);
+++    __m256d av6=_mm256_loadu_pd(a+24);
+++    __m256d av7=_mm256_loadu_pd(a+28);
+++
+++
+++    __m256d yv0=_mm256_mul_pd(av0, av0);
+++    __m256d yv1=_mm256_mul_pd(av1, av1);
+++    __m256d yv2=_mm256_mul_pd(av2, av2);
+++    __m256d yv3=_mm256_mul_pd(av3, av3);
+++
+++    __m256d yv4=_mm256_mul_pd(av4, av4);
+++    __m256d yv5=_mm256_mul_pd(av5, av5);
+++    __m256d yv6=_mm256_mul_pd(av6, av6);
+++    __m256d yv7=_mm256_mul_pd(av7, av7);
+++
+++    _mm256_storeu_pd(y, yv0);
+++    _mm256_storeu_pd(y+4, yv1);
+++    _mm256_storeu_pd(y+8, yv2);
+++    _mm256_storeu_pd(y+12, yv3);
+++
+++    _mm256_storeu_pd(y+16, yv4);
+++    _mm256_storeu_pd(y+20, yv5);
+++    _mm256_storeu_pd(y+24, yv6);
+++    _mm256_storeu_pd(y+28, yv7);
+++
+++    a+=32;
+++    y+=32;
+++    loop_count--;
+++  }
+++
+++  for(i=0; i<remain_count; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/kernel/x86_64/sqr_kernel.c b/kernel/x86_64/sqr_kernel.c
++new file mode 100644
++index 0000000..225e667
++--- /dev/null
+++++ b/kernel/x86_64/sqr_kernel.c
++@@ -0,0 +1,33 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG i=0;
+++  for(i=0; i<COMPSIZE*n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
++diff --git a/kernel/x86_64/ssqr_kernel_avx.c b/kernel/x86_64/ssqr_kernel_avx.c
++new file mode 100644
++index 0000000..3238d5e
++--- /dev/null
+++++ b/kernel/x86_64/ssqr_kernel_avx.c
++@@ -0,0 +1,64 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include "openvml_kernel.h"
+++
+++#include <immintrin.h>
+++
+++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
+++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
+++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
+++
+++  int i=0;
+++
+++  while(loop_count>0){
+++
+++    __m256 av0=_mm256_loadu_ps(a);
+++    __m256 av1=_mm256_loadu_ps(a+8);
+++    __m256 av2=_mm256_loadu_ps(a+16);
+++    __m256 av3=_mm256_loadu_ps(a+24);
+++
+++
+++    __m256 yv0=_mm256_mul_ps(av0, av0);
+++    __m256 yv1=_mm256_mul_ps(av1, av1);
+++    __m256 yv2=_mm256_mul_ps(av2, av2);
+++    __m256 yv3=_mm256_mul_ps(av3, av3);
+++
+++
+++    _mm256_storeu_ps(y, yv0);
+++    _mm256_storeu_ps(y+8, yv1);
+++    _mm256_storeu_ps(y+16, yv2);
+++    _mm256_storeu_ps(y+24, yv3);
+++
+++    a+=32;
+++    y+=32;
+++    loop_count--;
+++  }
+++
+++  for(i=0; i<remain_count; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/reference/CMakeLists.txt b/reference/CMakeLists.txt
++index dddc5db..4acb0c8 100644
++--- a/reference/CMakeLists.txt
+++++ b/reference/CMakeLists.txt
++@@ -1,6 +1,7 @@
++ set(OpenVML_REF_SRC
++   vadd.c
++   vsub.c
+++  vsqr.c
++   vpow.c
++   vpowx.c
++   vpow2o3.c
++@@ -27,4 +28,4 @@ if(NOT MSVC)
++ target_link_libraries(${OpenVML_LIBNAME}_ref m)
++ endif()
++
++-target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
++\ No newline at end of file
+++target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
++diff --git a/reference/vsqr.c b/reference/vsqr.c
++new file mode 100644
++index 0000000..35bf1b8
++--- /dev/null
+++++ b/reference/vsqr.c
++@@ -0,0 +1,49 @@
+++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
+++ * All rights reserved.
+++ *
+++ * Redistribution and use in source and binary forms, with or without modification,
+++ * are permitted provided that the following conditions are met:
+++ *
+++ * * Redistributions of source code must retain the above copyright notice, this
+++ *   list of conditions and the following disclaimer.
+++ *
+++ * * Redistributions in binary form must reproduce the above copyright notice, this
+++ *   list of conditions and the following disclaimer in the documentation and/or
+++ *   other materials provided with the distribution.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+++ */
+++
+++#include <stdlib.h>
+++#include <math.h>
+++#include <openvml_reference.h>
+++
+++void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y){
+++  VML_INT i;
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++  for(i=0; i<n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
+++void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y){
+++  VML_INT i;
+++  if (n<=0) return;
+++  if (a==NULL || y==NULL) return;
+++
+++  for(i=0; i<n; i++){
+++    y[i]=a[i]*a[i];
+++  }
+++}
+++
++diff --git a/test/test_sqr.c b/test/test_sqr.c
++index 806911a..bd45d41 100644
++--- a/test/test_sqr.c
+++++ b/test/test_sqr.c
++@@ -28,21 +28,21 @@
++ #include <string.h>
++ #include <openvml_reference.h>
++
++-static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
++-static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
+++static char* funcname[4]={"vsSqr", "vdSqr", NULL, NULL};
+++static double flop_per_elem[4]={1.0, 1.0, 0, 0};
++
++ static a_y_func_t ref_vsqr[] = {
++   (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
++   (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME_REF(vcSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME_REF(vzSqr),
+++  NULL,
+++  NULL,
++ };
++
++ static a_y_func_t test_vsqr[] = {
++   (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
++   (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME(vcSqr),
++-  (a_y_func_t)OpenVML_FUNCNAME(vzSqr),
+++  NULL,
+++  NULL,
++ };
++
++
++@@ -54,10 +54,3 @@ CTEST2(check_result_d, sqr){
++   run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++ }
++
++-CTEST2(check_result_c, sqr){
++-  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++-}
++-
++-CTEST2(check_result_z, sqr){
++-  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
++-}
 diff --git a/reference/CMakeLists.txt b/reference/CMakeLists.txt
 index dddc5db..2f8e10c 100644
 --- a/reference/CMakeLists.txt
@@ -387,6 +3253,112 @@ index dddc5db..2f8e10c 100644
 -target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
+diff --git a/reference/vdiv.c b/reference/vdiv.c
+index e69de29..59ddfd3 100644
+--- a/reference/vdiv.c
++++ b/reference/vdiv.c
+@@ -0,0 +1,48 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <stdlib.h>
++#include <math.h>
++#include <openvml_reference.h>
++
++void OpenVML_FUNCNAME_REF(vsDiv)(const VML_INT n, const float * a, const float * b, float * y){
++  VML_INT i;
++  if (n<=0) return;
++  if (a==NULL || b == NULL || y==NULL) return;
++
++  for(i=0; i<n; i++){
++    y[i]=a[i]/b[i];
++  }
++}
++
++void OpenVML_FUNCNAME_REF(vdDiv)(const VML_INT n, const double * a, const float * b, double * y){
++  VML_INT i;
++  if (n<=0) return;
++  if (a==NULL || b == NULL || y==NULL) return;
++
++  for(i=0; i<n; i++){
++    y[i]=a[i]/b[i];
++  }
++}
+diff --git a/reference/vmul.c b/reference/vmul.c
+index e69de29..33fccdf 100644
+--- a/reference/vmul.c
++++ b/reference/vmul.c
+@@ -0,0 +1,48 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <stdlib.h>
++#include <math.h>
++#include <openvml_reference.h>
++
++void OpenVML_FUNCNAME_REF(vsMul)(const VML_INT n, const float * a, const float * b, float * y){
++  VML_INT i;
++  if (n<=0) return;
++  if (a==NULL || b == NULL || y==NULL) return;
++
++  for(i=0; i<n; i++){
++    y[i]=a[i]*b[i];
++  }
++}
++
++void OpenVML_FUNCNAME_REF(vdMul)(const VML_INT n, const double * a, const float * b, double * y){
++  VML_INT i;
++  if (n<=0) return;
++  if (a==NULL || b == NULL || y==NULL) return;
++
++  for(i=0; i<n; i++){
++    y[i]=a[i]*b[i];
++  }
++}
 diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
 index c33cba3..54aa96a 100644
 --- a/test/CMakeLists.txt
@@ -406,3 +3378,123 @@ index c33cba3..54aa96a 100644
    test_pow.c
    test_powx.c
    test_pow2o3.c
+diff --git a/test/test_div.c b/test/test_div.c
+index e69de29..d799011 100644
+--- a/test/test_div.c
++++ b/test/test_div.c
+@@ -0,0 +1,55 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "vml_test.h"
++#include <stdio.h>
++#include <string.h>
++#include <openvml_reference.h>
++
++static char* funcname[4]={"vsDiv", "vdDiv", NULL, NULL};
++static double flop_per_elem[4]={1.0, 1.0, 0, 0};
++
++static a_y_func_t ref_vdiv[] = {
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsDiv),
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdDiv),
++  NULL,
++  NULL,
++};
++
++static a_y_func_t test_vdiv[] = {
++  (a_y_func_t)OpenVML_FUNCNAME(vsDiv),
++  (a_y_func_t)OpenVML_FUNCNAME(vdDiv),
++  NULL,
++  NULL,
++};
++
++
++CTEST2(check_result_s, div){
++  run_test_a_y(data->parameter, funcname, test_vdiv, ref_vdiv, flop_per_elem);
++}
++
++CTEST2(check_result_d, div){
++  run_test_a_y(data->parameter, funcname, test_vdiv, ref_vdiv, flop_per_elem);
++}
+diff --git a/test/test_mul.c b/test/test_mul.c
+index e69de29..64fabd2 100644
+--- a/test/test_mul.c
++++ b/test/test_mul.c
+@@ -0,0 +1,55 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "vml_test.h"
++#include <stdio.h>
++#include <string.h>
++#include <openvml_reference.h>
++
++static char* funcname[4]={"vsMul", "vdMul", NULL, NULL};
++static double flop_per_elem[4]={1.0, 1.0, 0, 0};
++
++static a_y_func_t ref_vmul[] = {
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsMul),
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdMul),
++  NULL,
++  NULL,
++};
++
++static a_y_func_t test_vmul[] = {
++  (a_y_func_t)OpenVML_FUNCNAME(vsMul),
++  (a_y_func_t)OpenVML_FUNCNAME(vdMul),
++  NULL,
++  NULL,
++};
++
++
++CTEST2(check_result_s, mul){
++  run_test_a_y(data->parameter, funcname, test_vmul, ref_vmul, flop_per_elem);
++}
++
++CTEST2(check_result_d, mul){
++  run_test_a_y(data->parameter, funcname, test_vmul, ref_vmul, flop_per_elem);
++}
