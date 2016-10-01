@@ -1,22 +1,22 @@
 [
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/tape.cpp.o -c /home/guillem/Github/AutoDiff/src/tape.cpp",
+  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/tape.cpp.o -c /home/guillem/Github/AutoDiff/src/tape.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/tape.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/cpu.cpp.o -c /home/guillem/Github/AutoDiff/src/cpu.cpp",
+  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/cpu.cpp.o -c /home/guillem/Github/AutoDiff/src/cpu.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/cpu.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/blas.cpp.o -c /home/guillem/Github/AutoDiff/src/blas.cpp",
+  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/blas.cpp.o -c /home/guillem/Github/AutoDiff/src/blas.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/blas.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/main.cpp.o -c /home/guillem/Github/AutoDiff/src/main.cpp",
+  "command": "/usr/bin/c++   -DNDEBUG -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include    -std=gnu++14 -o CMakeFiles/AutoDiff.dir/main.cpp.o -c /home/guillem/Github/AutoDiff/src/main.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/main.cpp"
 }
 ]
