@@ -32,19 +32,19 @@ int main()
 {
 	Tape::use(nullptr);
 
-	constexpr int dim1 = 3;
-	constexpr int dim2 = 7;
+	constexpr int dim1 = 5;
+	constexpr int dim2 = 5;
 
 	auto& x = Variable({dim1, dim2}, 1);
 	auto& y = Variable({dim1, dim2}, 2);
 	auto& z = Variable({dim1, dim2}, 2);
 
-	x()[3] = 5;
+	x.values()[3] = 5;
 
-	auto& r = x * y + z + pow(x, 4.0);
+	auto& r = x + y + z - z*y + mul(x, y);
 
 	printf("r:\n");
-	matprint(r.shape(), r());
+	matprint(r.shape(), r.values());
 
 	//getchar();
 
@@ -53,15 +53,13 @@ int main()
 	Tape::current()->execute();
 
 	printf("X:\n");
-	matprint(x.shape(), x.adj());
+	matprint(x.shape(), x.adjoints());
 
 	printf("Y:\n");
-	matprint(y.shape(), y.adj());
+	matprint(y.shape(), y.adjoints());
 
 	printf("Z:\n");
-	matprint(z.shape(), z.adj());
-
-	getchar();
+	matprint(z.shape(), z.adjoints());
 
 	return 0;
 }

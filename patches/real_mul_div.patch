@@ -5,16 +5,16 @@ index 09cc02f..f5a8ade 100644
 @@ -46,6 +46,12 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
  OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
- 
-+OPENVML_EXPORT void OpenVML_FUNCNAME(vsMul)(const VML_INT n, const float * a, const float * b, float * y);
-+OPENVML_EXPORT void OpenVML_FUNCNAME(vdMul)(const VML_INT n, const double * a, const double * b, double * y);
+
++OPENVML_EXPORT void OpenVML_FUNCNAME(vsAddmul)(const VML_INT n, const float * a, const float * b, float * y);
++OPENVML_EXPORT void OpenVML_FUNCNAME(vdAddmul)(const VML_INT n, const double * a, const double * b, double * y);
 +
-+OPENVML_EXPORT void OpenVML_FUNCNAME(vsDiv)(const VML_INT n, const float * a, const float * b, float * y);
-+OPENVML_EXPORT void OpenVML_FUNCNAME(vdDiv)(const VML_INT n, const double * a, const double * b, double * y);
++OPENVML_EXPORT void OpenVML_FUNCNAME(vsAdddiv)(const VML_INT n, const float * a, const float * b, float * y);
++OPENVML_EXPORT void OpenVML_FUNCNAME(vdAdddiv)(const VML_INT n, const double * a, const double * b, double * y);
 +
  OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
- 
+
 diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
 index f4d8e94..23c4255 100644
 --- a/include/openvml_kernel.h
@@ -22,13 +22,13 @@ index f4d8e94..23c4255 100644
 @@ -41,6 +41,11 @@ void OpenVML_FUNCNAME(dsub_k)(VMLLONG n, double * a, double * b, double * y, dou
  void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
- 
-+void OpenVML_FUNCNAME(smul_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
-+void OpenVML_FUNCNAME(dmul_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
+
++void OpenVML_FUNCNAME(saddmul_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++void OpenVML_FUNCNAME(daddmul_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
 +
-+void OpenVML_FUNCNAME(sdiv_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
-+void OpenVML_FUNCNAME(ddiv_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
- 
++void OpenVML_FUNCNAME(sadddiv_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
++void OpenVML_FUNCNAME(dadddiv_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
+
  void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
 diff --git a/include/openvml_macros.h b/include/openvml_macros.h
@@ -38,12 +38,12 @@ index eef53cf..7796275 100644
 @@ -43,6 +43,12 @@
  #define CSUB_K OpenVML_FUNCNAME(csub_k)
  #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
- 
-+#define SMUL_K OpenVML_FUNCNAME(smul_k)
-+#define DMUL_K OpenVML_FUNCNAME(dmul_k)
+
++#define SADDMUL_K OpenVML_FUNCNAME(saddmul_k)
++#define DADDMUL_K OpenVML_FUNCNAME(daddmul_k)
 +
-+#define SDIV_K OpenVML_FUNCNAME(sdiv_k)
-+#define DDIV_K OpenVML_FUNCNAME(ddiv_k)
++#define SADDDIV_K OpenVML_FUNCNAME(sadddiv_k)
++#define DADDDIV_K OpenVML_FUNCNAME(dadddiv_k)
 +
  #define SPOW_K OpenVML_FUNCNAME(spow_k)
  #define DPOW_K OpenVML_FUNCNAME(dpow_k)
@@ -52,8 +52,8 @@ index eef53cf..7796275 100644
  #ifndef DOUBLE
  #define ADD_K SADD_K
  #define SUB_K SSUB_K
-+#define MUL_K SMUL_K
-+#define DIV_K SDIV_K
++#define ADDMUL_K SADDMUL_K
++#define ADDDIV_K SADDDIV_K
  #define POW_K SPOW_K
  #define POWX_K SPOWX_K
  #define EXP_K SEXP_K
@@ -61,8 +61,8 @@ index eef53cf..7796275 100644
  #else
  #define ADD_K DADD_K
  #define SUB_K DSUB_K
-+#define MUL_K DMUL_K
-+#define DIV_K DDIV_K
++#define ADDMUL_K DADDMUL_K
++#define ADDDIV_K DADDDIV_K
  #define POW_K DPOW_K
  #define POWX_K DPOWX_K
  #define EXP_K DEXP_K
@@ -73,16 +73,16 @@ index fdb0beb..e6b622e 100644
 @@ -46,6 +46,12 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSub)(const VML_INT n, const double *
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
- 
-+OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsMul)(const VML_INT n, const float * a, const float * b, float * y);
-+OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdMul)(const VML_INT n, const double * a, const double * b, double * y);
+
++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsAddmul)(const VML_INT n, const float * a, const float * b, float * y);
++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdAddmul)(const VML_INT n, const double * a, const double * b, double * y);
 +
-+OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsDiv)(const VML_INT n, const float * a, const float * b, float * y);
-+OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdDiv)(const VML_INT n, const double * a, const double * b, double * y);
++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsAdddiv)(const VML_INT n, const float * a, const float * b, float * y);
++OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdAdddiv)(const VML_INT n, const double * a, const double * b, double * y);
 +
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
- 
+
 diff --git a/interface/CMakeLists.txt b/interface/CMakeLists.txt
 index de9f6b3..22607ac 100644
 --- a/interface/CMakeLists.txt
@@ -90,14 +90,14 @@ index de9f6b3..22607ac 100644
 @@ -5,11 +5,11 @@ set(OpenVML_LIBSRC_D "")
  set(OpenVML_LIBSRC_C "")
  set(OpenVML_LIBSRC_Z "")
- 
--set(REAL_INTERFACE_LIST 
--  add sub 
--  pow powx pow2o3 pow3o2 exp expm1 
--  tanh 
--  log10 ln log1p 
+
+-set(REAL_INTERFACE_LIST
+-  add sub
+-  pow powx pow2o3 pow3o2 exp expm1
+-  tanh
+-  log10 ln log1p
 +set(REAL_INTERFACE_LIST
-+  add sub mul div 
++  add sub addmul adddiv
 +  pow powx pow2o3 pow3o2 exp expm1
 +  tanh
 +  log10 ln log1p
@@ -106,82 +106,82 @@ index de9f6b3..22607ac 100644
  set(COMPLEX_INTERFACE_LIST add sub)
 @@ -38,12 +38,12 @@ foreach(INTERFACE ${REAL_INTERFACE_LIST})
    cap_string(${INTERFACE} OpenVML_INTERFACE_NAME)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vs${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vs${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vs${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
- 
+
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c
      DEPENDS ${INTERFACE}.c
 @@ -51,12 +51,12 @@ foreach(INTERFACE ${REAL_INTERFACE_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vd${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vd${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vd${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
- 
+
  endforeach(INTERFACE)
- 
+
 @@ -84,12 +84,12 @@ foreach(INTERFACE ${COMPLEX_INTERFACE_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_c.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_c.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_c.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vc${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vc${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vc${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
- 
+
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c
      DEPENDS ${INTERFACE}.c
 @@ -97,15 +97,15 @@ foreach(INTERFACE ${COMPLEX_INTERFACE_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vz${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vz${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vz${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
- 
+
  Endforeach(INTERFACE)
- 
+
  add_library(openvml_interface_core OBJECT ${OpenVML_LIBSRC_S} ${OpenVML_LIBSRC_D} ${OpenVML_LIBSRC_C} ${OpenVML_LIBSRC_Z} ${OpenVML_LIBSRC_OTHER})
- 
+
 -target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
-diff --git a/interface/div.c b/interface/div.c
+diff --git a/interface/adddiv.c b/interface/adddiv.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/interface/div.c
++++ b/interface/adddiv.c
 @@ -0,0 +1,39 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -213,20 +213,20 @@ index 0000000..a2f27d6
 +#include <openvml_kernel.h>
 +
 +
-+void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y) {
++void CNAME(const VML_INT n, const VML_FLOAT * a, const VML_FLOAT * b, VML_FLOAT * y) {
 +
 +  if (n<=0) return;
 +  if (a==NULL || b == NULL || y==NULL) return;
 +
 +
-+  EXEC_VML(0, DIV_K, n, (VML_FLOAT*)a,  (VML_FLOAT*)b, y, NULL, NULL);
++  EXEC_VML(0, ADDDIV_K, n, (VML_FLOAT*)a,  (VML_FLOAT*)b, y, NULL, NULL);
 +
 +}
-diff --git a/interface/mul.c b/interface/mul.c
+diff --git a/interface/addmul.c b/interface/addmul.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/interface/mul.c
++++ b/interface/addmul.c
 @@ -0,0 +1,39 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -258,13 +258,13 @@ index 0000000..a2f27d6
 +#include <openvml_kernel.h>
 +
 +
-+void CNAME(const VML_INT n, const VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y) {
++void CNAME(const VML_INT n, const VML_FLOAT * a, const VML_FLOAT * b, VML_FLOAT * y) {
 +
 +  if (n<=0) return;
 +  if (a==NULL || b == NULL || y==NULL) return;
 +
 +
-+  EXEC_VML(0, MUL_K, n, (VML_FLOAT*)a,  (VML_FLOAT*)b, y, NULL, NULL);
++  EXEC_VML(0, ADDMUL_K, n, (VML_FLOAT*)a,  (VML_FLOAT*)b, y, NULL, NULL);
 +
 +}
 diff --git a/kernel/CMakeLists.txt b/kernel/CMakeLists.txt
@@ -273,86 +273,86 @@ index 51ba9a9..ed99f17 100644
 +++ b/kernel/CMakeLists.txt
 @@ -7,11 +7,11 @@ set(OpenVML_LIBSRC_C "")
  set(OpenVML_LIBSRC_Z "")
- 
+
  #s,d
 -set(KERNEL_LIST add sub pow powx exp expm1 tanh log10 ln log1p floor
-+set(KERNEL_LIST add sub mul div pow powx exp expm1 tanh log10 ln log1p floor
++set(KERNEL_LIST add sub addmul adddiv pow powx exp expm1 tanh log10 ln log1p floor
    sin cos sincos tan asin acos atan atan2)
- 
+
  #c,z
--set(Z_KERNEL_LIST add sub) 
+-set(Z_KERNEL_LIST add sub)
 +set(Z_KERNEL_LIST add sub)
  ######## s,d kernels
- 
+
  foreach(KERNEL ${KERNEL_LIST})
 @@ -35,12 +35,12 @@ foreach(KERNEL ${KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_s_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_s_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_s_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}s${KERNEL}_k${OpenVML_FUNC_SUFFIX} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}s${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}s${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
- 
+
    set(D_KERNEL_SOURCE ${${KERNEL}_D_KERNEL_SOURCE})
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 @@ -49,12 +49,12 @@ foreach(KERNEL ${KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}d${KERNEL}_k${OpenVML_FUNC_SUFFIX}) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}d${KERNEL}_k${OpenVML_FUNC_SUFFIX})
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}d${KERNEL}_k${OpenVML_FUNC_SUFFIX})
- 
+
  endforeach(KERNEL)
- 
+
 @@ -83,12 +83,12 @@ foreach(KERNEL ${Z_KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_c_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_c_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_c_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}c${KERNEL}_k${OpenVML_FUNC_SUFFIX} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}c${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}c${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
- 
+
    set(Z_KERNEL_SOURCE ${${KERNEL}_Z_KERNEL_SOURCE})
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 @@ -97,12 +97,12 @@ foreach(KERNEL ${Z_KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} ) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
- 
+
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
--    APPEND 
--    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}z${KERNEL}_k${OpenVML_FUNC_SUFFIX}) 
+-    APPEND
+-    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}z${KERNEL}_k${OpenVML_FUNC_SUFFIX})
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}z${KERNEL}_k${OpenVML_FUNC_SUFFIX})
- 
+
  endforeach(KERNEL)
- 
+
 diff --git a/kernel/aarch64/Kernel_generic.txt b/kernel/aarch64/Kernel_generic.txt
 index 9a15eca..957348c 100644
 --- a/kernel/aarch64/Kernel_generic.txt
@@ -360,16 +360,16 @@ index 9a15eca..957348c 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
- 
-+set(mul_S_KERNEL_SOURCE generic/mul_kernel.c)
-+set(mul_D_KERNEL_SOURCE generic/mul_kernel.c)
+
++set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
++set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
-+set(div_S_KERNEL_SOURCE generic/div_kernel.c)
-+set(div_D_KERNEL_SOURCE generic/div_kernel.c)
++set(adddiv_S_KERNEL_SOURCE generic/adddiv_kernel.c)
++set(adddiv_D_KERNEL_SOURCE generic/adddiv_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
- 
+
 diff --git a/kernel/arm/Kernel_generic.txt b/kernel/arm/Kernel_generic.txt
 index 9a15eca..957348c 100644
 --- a/kernel/arm/Kernel_generic.txt
@@ -377,16 +377,16 @@ index 9a15eca..957348c 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
- 
-+set(mul_S_KERNEL_SOURCE generic/mul_kernel.c)
-+set(mul_D_KERNEL_SOURCE generic/mul_kernel.c)
+
++set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
++set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
-+set(div_S_KERNEL_SOURCE generic/div_kernel.c)
-+set(div_D_KERNEL_SOURCE generic/div_kernel.c)
++set(adddiv_S_KERNEL_SOURCE generic/adddiv_kernel.c)
++set(adddiv_D_KERNEL_SOURCE generic/adddiv_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
- 
+
 diff --git a/kernel/generic/Kernel_generic.txt b/kernel/generic/Kernel_generic.txt
 index fa9fed5..bd709f2 100644
 --- a/kernel/generic/Kernel_generic.txt
@@ -394,21 +394,21 @@ index fa9fed5..bd709f2 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
- 
-+set(mul_S_KERNEL_SOURCE generic/mul_kernel.c)
-+set(mul_D_KERNEL_SOURCE generic/mul_kernel.c)
+
++set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
++set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
-+set(div_S_KERNEL_SOURCE generic/div_kernel.c)
-+set(div_D_KERNEL_SOURCE generic/div_kernel.c)
++set(adddiv_S_KERNEL_SOURCE generic/adddiv_kernel.c)
++set(adddiv_D_KERNEL_SOURCE generic/adddiv_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
  #set(pow_C_KERNEL_SOURCE ${OpenVML_ARCH}/pow_kernel.c)
-diff --git a/kernel/generic/div_kernel.c b/kernel/generic/div_kernel.c
+diff --git a/kernel/generic/adddiv_kernel.c b/kernel/generic/adddiv_kernel.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/generic/div_kernel.c
++++ b/kernel/generic/adddiv_kernel.c
 @@ -0,0 +1,33 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -440,14 +440,14 @@ index 0000000..a2f27d6
 +void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
 +  VMLLONG i=0;
 +  for(i=0; i<COMPSIZE*n; i++){
-+    y[i]=a[i]/b[i];
++    y[i]+=a[i]/b[i];
 +  }
 +}
-diff --git a/kernel/generic/mul_kernel.c b/kernel/generic/mul_kernel.c
+diff --git a/kernel/generic/addmul_kernel.c b/kernel/generic/addmul_kernel.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/generic/mul_kernel.c
++++ b/kernel/generic/addmul_kernel.c
 @@ -0,0 +1,33 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -479,7 +479,7 @@ index 0000000..a2f27d6
 +void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
 +  VMLLONG i=0;
 +  for(i=0; i<COMPSIZE*n; i++){
-+    y[i]=a[i]*b[i];
++    y[i]+=a[i]*b[i];
 +  }
 +}
 diff --git a/kernel/x86_64/Kernel_generic.txt b/kernel/x86_64/Kernel_generic.txt
@@ -489,16 +489,16 @@ index dee6831..8d97693 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
- 
-+set(mul_S_KERNEL_SOURCE generic/mul_kernel.c)
-+set(mul_D_KERNEL_SOURCE generic/mul_kernel.c)
+
++set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
++set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
-+set(div_S_KERNEL_SOURCE generic/div_kernel.c)
-+set(div_D_KERNEL_SOURCE generic/div_kernel.c)
++set(adddiv_S_KERNEL_SOURCE generic/adddiv_kernel.c)
++set(adddiv_D_KERNEL_SOURCE generic/adddiv_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
- 
+
 diff --git a/kernel/x86_64/Kernel_haswell.txt b/kernel/x86_64/Kernel_haswell.txt
 index 81fd684..3830402 100644
 --- a/kernel/x86_64/Kernel_haswell.txt
@@ -506,16 +506,16 @@ index 81fd684..3830402 100644
 @@ -16,6 +16,12 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
- 
-+set(mul_S_KERNEL_SOURCE ${OpenVML_ARCH}/mul_kernel.c)
-+set(mul_D_KERNEL_SOURCE ${OpenVML_ARCH}/mul_kernel.c)
+
++set(addmul_S_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
++set(addmul_D_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
 +
-+set(div_S_KERNEL_SOURCE ${OpenVML_ARCH}/div_kernel.c)
-+set(div_D_KERNEL_SOURCE ${OpenVML_ARCH}/div_kernel.c)
++set(adddiv_S_KERNEL_SOURCE ${OpenVML_ARCH}/adddiv_kernel.c)
++set(adddiv_D_KERNEL_SOURCE ${OpenVML_ARCH}/adddiv_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
- 
+
 diff --git a/kernel/x86_64/Kernel_sandybridge.txt b/kernel/x86_64/Kernel_sandybridge.txt
 index 55e5a05..0d31db2 100644
 --- a/kernel/x86_64/Kernel_sandybridge.txt
@@ -523,22 +523,22 @@ index 55e5a05..0d31db2 100644
 @@ -16,6 +16,12 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
- 
-+set(mul_S_KERNEL_SOURCE ${OpenVML_ARCH}/mul_kernel.c)
-+set(mul_D_KERNEL_SOURCE ${OpenVML_ARCH}/mul_kernel.c)
+
++set(addmul_S_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
++set(addmul_D_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
 +
-+set(div_S_KERNEL_SOURCE ${OpenVML_ARCH}/div_kernel.c)
-+set(div_D_KERNEL_SOURCE ${OpenVML_ARCH}/div_kernel.c)
++set(adddiv_S_KERNEL_SOURCE ${OpenVML_ARCH}/adddiv_kernel.c)
++set(adddiv_D_KERNEL_SOURCE ${OpenVML_ARCH}/adddiv_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
- 
-diff --git a/kernel/x86_64/ddiv_kernel_avx.c b/kernel/x86_64/ddiv_kernel_avx.c
+
+diff --git a/kernel/x86_64/dadddiv_kernel_avx.c b/kernel/x86_64/dadddiv_kernel_avx.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/x86_64/ddiv_kernel_avx.c
-@@ -0,0 +1,87 @@
++++ b/kernel/x86_64/dadddiv_kernel_avx.c
+@@ -0,0 +1,97 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
 + *
@@ -596,16 +596,26 @@ index 0000000..a2f27d6
 +    __m256d bv6=_mm256_loadu_pd(b+24);
 +    __m256d bv7=_mm256_loadu_pd(b+28);
 +
++    __m256d yr0=_mm256_loadu_pd(y);
++    __m256d yr1=_mm256_loadu_pd(y+4);
++    __m256d yr2=_mm256_loadu_pd(y+8);
++    __m256d yr3=_mm256_loadu_pd(y+12);
 +
-+    __m256d yv0=_mm256_div_pd(av0, bv0);
-+    __m256d yv1=_mm256_div_pd(av1, bv1);
-+    __m256d yv2=_mm256_div_pd(av2, bv2);
-+    __m256d yv3=_mm256_div_pd(av3, bv3);
++    __m256d yr4=_mm256_loadu_pd(y+16);
++    __m256d yr5=_mm256_loadu_pd(y+20);
++    __m256d yr6=_mm256_loadu_pd(y+24);
++    __m256d yr7=_mm256_loadu_pd(y+28);
 +
-+    __m256d yv4=_mm256_div_pd(av4, bv4);
-+    __m256d yv5=_mm256_div_pd(av5, bv5);
-+    __m256d yv6=_mm256_div_pd(av6, bv6);
-+    __m256d yv7=_mm256_div_pd(av7, bv7);
++
++    __m256d yv0=_mm256_add_pd(_mm256_div_pd(av0, bv0), yr0);
++    __m256d yv1=_mm256_add_pd(_mm256_div_pd(av1, bv1), yr1);
++    __m256d yv2=_mm256_add_pd(_mm256_div_pd(av2, bv2), yr2);
++    __m256d yv3=_mm256_add_pd(_mm256_div_pd(av3, bv3), yr3);
++
++    __m256d yv4=_mm256_add_pd(_mm256_div_pd(av4, bv4), yr4);
++    __m256d yv5=_mm256_add_pd(_mm256_div_pd(av5, bv5), yr5);
++    __m256d yv6=_mm256_add_pd(_mm256_div_pd(av6, bv6), yr6);
++    __m256d yv7=_mm256_add_pd(_mm256_div_pd(av7, bv7), yr7);
 +
 +    _mm256_storeu_pd(y, yv0);
 +    _mm256_storeu_pd(y+4, yv1);
@@ -623,14 +633,14 @@ index 0000000..a2f27d6
 +  }
 +
 +  for(i=0; i<remain_count; i++){
-+    y[i]=a[i]/b[i];
++    y[i]+=a[i]/b[i];
 +  }
 +}
-diff --git a/kernel/x86_64/div_kernel.c b/kernel/x86_64/div_kernel.c
+diff --git a/kernel/x86_64/adddiv_kernel.c b/kernel/x86_64/adddiv_kernel.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/x86_64/div_kernel.c
++++ b/kernel/x86_64/adddiv_kernel.c
 @@ -0,0 +1,33 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -662,15 +672,15 @@ index 0000000..a2f27d6
 +void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
 +  VMLLONG i=0;
 +  for(i=0; i<COMPSIZE*n; i++){
-+    y[i]=a[i]/b[i];
++    y[i]+=a[i]/b[i];
 +  }
 +}
-diff --git a/kernel/x86_64/dmul_kernel_avx.c b/kernel/x86_64/dmul_kernel_avx.c
+diff --git a/kernel/x86_64/daddmul_kernel_avx.c b/kernel/x86_64/daddmul_kernel_avx.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/x86_64/dmul_kernel_avx.c
-@@ -0,0 +1,87 @@
++++ b/kernel/x86_64/daddmul_kernel_avx.c
+@@ -0,0 +1,97 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
 + *
@@ -728,16 +738,26 @@ index 0000000..a2f27d6
 +    __m256d bv6=_mm256_loadu_pd(b+24);
 +    __m256d bv7=_mm256_loadu_pd(b+28);
 +
++    __m256d yr0=_mm256_loadu_pd(y);
++    __m256d yr1=_mm256_loadu_pd(y+4);
++    __m256d yr2=_mm256_loadu_pd(y+8);
++    __m256d yr3=_mm256_loadu_pd(y+12);
 +
-+    __m256d yv0=_mm256_mul_pd(av0, bv0);
-+    __m256d yv1=_mm256_mul_pd(av1, bv1);
-+    __m256d yv2=_mm256_mul_pd(av2, bv2);
-+    __m256d yv3=_mm256_mul_pd(av3, bv3);
++    __m256d yr4=_mm256_loadu_pd(y+16);
++    __m256d yr5=_mm256_loadu_pd(y+20);
++    __m256d yr6=_mm256_loadu_pd(y+24);
++    __m256d yr7=_mm256_loadu_pd(y+28);
 +
-+    __m256d yv4=_mm256_mul_pd(av4, bv4);
-+    __m256d yv5=_mm256_mul_pd(av5, bv5);
-+    __m256d yv6=_mm256_mul_pd(av6, bv6);
-+    __m256d yv7=_mm256_mul_pd(av7, bv7);
++
++    __m256d yv0=_mm256_add_pd(_mm256_mul_pd(av0, bv0), yr0);
++    __m256d yv1=_mm256_add_pd(_mm256_mul_pd(av1, bv1), yr1);
++    __m256d yv2=_mm256_add_pd(_mm256_mul_pd(av2, bv2), yr2);
++    __m256d yv3=_mm256_add_pd(_mm256_mul_pd(av3, bv3), yr3);
++
++    __m256d yv4=_mm256_add_pd(_mm256_mul_pd(av4, bv4), yr4);
++    __m256d yv5=_mm256_add_pd(_mm256_mul_pd(av5, bv5), yr5);
++    __m256d yv6=_mm256_add_pd(_mm256_mul_pd(av6, bv6), yr6);
++    __m256d yv7=_mm256_add_pd(_mm256_mul_pd(av7, bv7), yr7);
 +
 +    _mm256_storeu_pd(y, yv0);
 +    _mm256_storeu_pd(y+4, yv1);
@@ -755,14 +775,14 @@ index 0000000..a2f27d6
 +  }
 +
 +  for(i=0; i<remain_count; i++){
-+    y[i]=a[i]*b[i];
++    y[i]+=a[i]*b[i];
 +  }
 +}
-diff --git a/kernel/x86_64/mul_kernel.c b/kernel/x86_64/mul_kernel.c
+diff --git a/kernel/x86_64/addmul_kernel.c b/kernel/x86_64/addmul_kernel.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/x86_64/mul_kernel.c
++++ b/kernel/x86_64/addmul_kernel.c
 @@ -0,0 +1,33 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -794,14 +814,92 @@ index 0000000..a2f27d6
 +void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
 +  VMLLONG i=0;
 +  for(i=0; i<COMPSIZE*n; i++){
-+    y[i]=a[i]*b[i];
++    y[i]+=a[i]*b[i];
 +  }
 +}
-diff --git a/kernel/x86_64/sdiv_kernel_avx.c b/kernel/x86_64/sdiv_kernel_avx.c
+diff --git a/kernel/x86_64/sadddiv_kernel_avx.c b/kernel/x86_64/sadddiv_kernel_avx.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/kernel/x86_64/sdiv_kernel_avx.c
++++ b/kernel/x86_64/sadddiv_kernel_avx.c
+@@ -0,0 +1,72 @@
++/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without modification,
++ * are permitted provided that the following conditions are met:
++ *
++ * * Redistributions of source code must retain the above copyright notice, this
++ *   list of conditions and the following disclaimer.
++ *
++ * * Redistributions in binary form must reproduce the above copyright notice, this
++ *   list of conditions and the following disclaimer in the documentation and/or
++ *   other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
++ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
++ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "openvml_kernel.h"
++
++#include <immintrin.h>
++
++void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
++  VMLLONG loop_count=(COMPSIZE*n) >> 5;
++  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
++
++  int i=0;
++
++  while(loop_count>0){
++
++    __m256d av0=_mm256_loadu_ps(a);
++    __m256d av2=_mm256_loadu_ps(a+8);
++    __m256d av4=_mm256_loadu_ps(a+16);
++    __m256d av6=_mm256_loadu_ps(a+24);
++
++    __m256d bv0=_mm256_loadu_ps(b);
++    __m256d bv2=_mm256_loadu_ps(b+8);
++    __m256d bv4=_mm256_loadu_ps(b+16);
++    __m256d bv6=_mm256_loadu_ps(b+24);
++
++    __m256d yr0=_mm256_loadu_ps(y);
++    __m256d yr2=_mm256_loadu_ps(y+8);
++    __m256d yr4=_mm256_loadu_ps(y+16);
++    __m256d yr6=_mm256_loadu_ps(y+24);
++
++
++    __m256d yv0=_mm256_add_ps(_mm256_div_ps(av0, bv0), yr0);
++    __m256d yv2=_mm256_add_ps(_mm256_div_ps(av2, bv2), yr2);
++    __m256d yv4=_mm256_add_ps(_mm256_div_ps(av4, bv4), yr4);
++    __m256d yv6=_mm256_add_ps(_mm256_div_ps(av6, bv6), yr6);
++
++    _mm256_storeu_ps(y, yv0);
++    _mm256_storeu_ps(y+8, yv2);
++    _mm256_storeu_ps(y+16, yv4);
++    _mm256_storeu_ps(y+24, yv6);
++
++    a+=32;
++    y+=32;
++    loop_count--;
++  }
++
++  for(i=0; i<remain_count; i++){
++    y[i]+=a[i]/b[i];
++  }
++}
+diff --git a/kernel/x86_64/saddmul_kernel_avx.c b/kernel/x86_64/saddmul_kernel_avx.c
+new file mode 100644
+index 0000000..a2f27d6
+--- /dev/null
++++ b/kernel/x86_64/saddmul_kernel_avx.c
 @@ -0,0 +1,67 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -850,89 +948,21 @@ index 0000000..a2f27d6
 +    __m256d bv4=_mm256_loadu_ps(b+16);
 +    __m256d bv6=_mm256_loadu_ps(b+24);
 +
-+
-+    __m256d yv0=_mm256_div_pd(av0, bv0);
-+    __m256d yv2=_mm256_div_pd(av2, bv2);
-+    __m256d yv4=_mm256_div_pd(av4, bv4);
-+    __m256d yv6=_mm256_div_pd(av6, bv6);
-+
-+    _mm256_storeu_pd(y, yv0);
-+    _mm256_storeu_pd(y+8, yv2);
-+    _mm256_storeu_pd(y+16, yv4);
-+    _mm256_storeu_pd(y+24, yv6);
-+
-+    a+=32;
-+    y+=32;
-+    loop_count--;
-+  }
-+
-+  for(i=0; i<remain_count; i++){
-+    y[i]=a[i]/b[i];
-+  }
-+}
-diff --git a/kernel/x86_64/smul_kernel_avx.c b/kernel/x86_64/smul_kernel_avx.c
-new file mode 100644
-index 0000000..a2f27d6
---- /dev/null
-+++ b/kernel/x86_64/smul_kernel_avx.c
-@@ -0,0 +1,67 @@
-+/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
-+ * All rights reserved.
-+ *
-+ * Redistribution and use in source and binary forms, with or without modification,
-+ * are permitted provided that the following conditions are met:
-+ *
-+ * * Redistributions of source code must retain the above copyright notice, this
-+ *   list of conditions and the following disclaimer.
-+ *
-+ * * Redistributions in binary form must reproduce the above copyright notice, this
-+ *   list of conditions and the following disclaimer in the documentation and/or
-+ *   other materials provided with the distribution.
-+ *
-+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-+ */
-+
-+#include "openvml_kernel.h"
-+
-+#include <immintrin.h>
-+
-+void KERNEL_NAME(VMLLONG n, VML_FLOAT * a, VML_FLOAT * b, VML_FLOAT * y, VML_FLOAT * z, VML_FLOAT * other_params) {
-+  VMLLONG loop_count=(COMPSIZE*n) >> 5;
-+  VMLLONG remain_count=(COMPSIZE*n) & 0x1f;
-+
-+  int i=0;
-+
-+  while(loop_count>0){
-+
-+    __m256d av0=_mm256_loadu_ps(a);
-+    __m256d av2=_mm256_loadu_ps(a+8);
-+    __m256d av4=_mm256_loadu_ps(a+16);
-+    __m256d av6=_mm256_loadu_ps(a+24);
-+
-+    __m256d bv0=_mm256_loadu_ps(b);
-+    __m256d bv2=_mm256_loadu_ps(b+8);
-+    __m256d bv4=_mm256_loadu_ps(b+16);
-+    __m256d bv6=_mm256_loadu_ps(b+24);
++    __m256d yr0=_mm256_loadu_ps(y);
++    __m256d yr2=_mm256_loadu_ps(y+8);
++    __m256d yr4=_mm256_loadu_ps(y+16);
++    __m256d yr6=_mm256_loadu_ps(y+24);
 +
 +
-+    __m256d yv0=_mm256_mul_pd(av0, bv0);
-+    __m256d yv2=_mm256_mul_pd(av2, bv2);
-+    __m256d yv4=_mm256_mul_pd(av4, bv4);
-+    __m256d yv6=_mm256_mul_pd(av6, bv6);
++    __m256d yv0=_mm256_add_ps(_mm256_mul_ps(av0, bv0), yr0);
++    __m256d yv2=_mm256_add_ps(_mm256_mul_ps(av2, bv2), yr2);
++    __m256d yv4=_mm256_add_ps(_mm256_mul_ps(av4, bv4), yr4);
++    __m256d yv6=_mm256_add_ps(_mm256_mul_ps(av6, bv6), yr6);
 +
-+    _mm256_storeu_pd(y, yv0);
-+    _mm256_storeu_pd(y+8, yv2);
-+    _mm256_storeu_pd(y+16, yv4);
-+    _mm256_storeu_pd(y+24, yv6);
++    _mm256_storeu_ps(y, yv0);
++    _mm256_storeu_ps(y+8, yv2);
++    _mm256_storeu_ps(y+16, yv4);
++    _mm256_storeu_ps(y+24, yv6);
 +
 +    a+=32;
 +    y+=32;
@@ -940,7 +970,7 @@ index 0000000..a2f27d6
 +  }
 +
 +  for(i=0; i<remain_count; i++){
-+    y[i]=a[i]*b[i];
++    y[i]+=a[i]*b[i];
 +  }
 +}
 diff --git a/reference/CMakeLists.txt b/reference/CMakeLists.txt
@@ -948,28 +978,28 @@ index dddc5db..2f8e10c 100644
 --- a/reference/CMakeLists.txt
 +++ b/reference/CMakeLists.txt
 @@ -1,6 +1,8 @@
--set(OpenVML_REF_SRC 
--  vadd.c 
+-set(OpenVML_REF_SRC
+-  vadd.c
 +set(OpenVML_REF_SRC
 +  vadd.c
    vsub.c
-+  vmul.c
-+  vdiv.c
++  vaddmul.c
++  vadddiv.c
    vpow.c
    vpowx.c
    vpow2o3.c
 @@ -27,4 +29,4 @@ if(NOT MSVC)
  target_link_libraries(${OpenVML_LIBNAME}_ref m)
  endif()
- 
+
 -target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
-diff --git a/reference/vdiv.c b/reference/vdiv.c
+diff --git a/reference/vadddiv.c b/reference/vadddiv.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/reference/vdiv.c
++++ b/reference/vadddiv.c
 @@ -0,0 +1,48 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -1000,30 +1030,30 @@ index 0000000..a2f27d6
 +#include <math.h>
 +#include <openvml_reference.h>
 +
-+void OpenVML_FUNCNAME_REF(vsDiv)(const VML_INT n, const float * a, const float * b, float * y){
++void OpenVML_FUNCNAME_REF(vsAdddiv)(const VML_INT n, const float * a, const float * b, float * y){
 +  VML_INT i;
 +  if (n<=0) return;
 +  if (a==NULL || b == NULL || y==NULL) return;
 +
 +  for(i=0; i<n; i++){
-+    y[i]=a[i]/b[i];
++    y[i]+=a[i]/b[i];
 +  }
 +}
 +
-+void OpenVML_FUNCNAME_REF(vdDiv)(const VML_INT n, const double * a, const float * b, double * y){
++void OpenVML_FUNCNAME_REF(vdAdddiv)(const VML_INT n, const double * a, const double * b, double * y){
 +  VML_INT i;
 +  if (n<=0) return;
 +  if (a==NULL || b == NULL || y==NULL) return;
 +
 +  for(i=0; i<n; i++){
-+    y[i]=a[i]/b[i];
++    y[i]+=a[i]/b[i];
 +  }
 +}
-diff --git a/reference/vmul.c b/reference/vmul.c
+diff --git a/reference/vaddmul.c b/reference/vaddmul.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/reference/vmul.c
++++ b/reference/vaddmul.c
 @@ -0,0 +1,48 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -1054,23 +1084,23 @@ index 0000000..a2f27d6
 +#include <math.h>
 +#include <openvml_reference.h>
 +
-+void OpenVML_FUNCNAME_REF(vsMul)(const VML_INT n, const float * a, const float * b, float * y){
++void OpenVML_FUNCNAME_REF(vsAddmul)(const VML_INT n, const float * a, const float * b, float * y){
 +  VML_INT i;
 +  if (n<=0) return;
 +  if (a==NULL || b == NULL || y==NULL) return;
 +
 +  for(i=0; i<n; i++){
-+    y[i]=a[i]*b[i];
++    y[i]+=a[i]*b[i];
 +  }
 +}
 +
-+void OpenVML_FUNCNAME_REF(vdMul)(const VML_INT n, const double * a, const float * b, double * y){
++void OpenVML_FUNCNAME_REF(vdAddmul)(const VML_INT n, const double * a, const double * b, double * y){
 +  VML_INT i;
 +  if (n<=0) return;
 +  if (a==NULL || b == NULL || y==NULL) return;
 +
 +  for(i=0; i<n; i++){
-+    y[i]=a[i]*b[i];
++    y[i]+=a[i]*b[i];
 +  }
 +}
 diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
@@ -1078,8 +1108,8 @@ index c33cba3..54aa96a 100644
 --- a/test/CMakeLists.txt
 +++ b/test/CMakeLists.txt
 @@ -1,10 +1,12 @@
--set(OpenVML_TESTSRC 
--  vml_test.c 
+-set(OpenVML_TESTSRC
+-  vml_test.c
 +set(OpenVML_TESTSRC
 +  vml_test.c
    vml_util.c
@@ -1087,16 +1117,16 @@ index c33cba3..54aa96a 100644
    openvml_timer.c
    test_add.c
    test_sub.c
-+  test_mul.c
-+  test_div.c
++  test_addmul.c
++  test_adddiv.c
    test_pow.c
    test_powx.c
    test_pow2o3.c
-diff --git a/test/test_div.c b/test/test_div.c
+diff --git a/test/test_adddiv.c b/test/test_adddiv.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/test/test_div.c
++++ b/test/test_adddiv.c
 @@ -0,0 +1,55 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -1128,36 +1158,36 @@ index 0000000..a2f27d6
 +#include <string.h>
 +#include <openvml_reference.h>
 +
-+static char* funcname[4]={"vsDiv", "vdDiv", NULL, NULL};
++static char* funcname[4]={"vsAdddiv", "vdAdddiv", NULL, NULL};
 +static double flop_per_elem[4]={1.0, 1.0, 0, 0};
 +
-+static a_y_func_t ref_vdiv[] = {
-+  (a_y_func_t)OpenVML_FUNCNAME_REF(vsDiv),
-+  (a_y_func_t)OpenVML_FUNCNAME_REF(vdDiv),
++static a_y_func_t ref_vadddiv[] = {
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsAdddiv),
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdAdddiv),
 +  NULL,
 +  NULL,
 +};
 +
-+static a_y_func_t test_vdiv[] = {
-+  (a_y_func_t)OpenVML_FUNCNAME(vsDiv),
-+  (a_y_func_t)OpenVML_FUNCNAME(vdDiv),
++static a_y_func_t test_vadddiv[] = {
++  (a_y_func_t)OpenVML_FUNCNAME(vsAdddiv),
++  (a_y_func_t)OpenVML_FUNCNAME(vdAdddiv),
 +  NULL,
 +  NULL,
 +};
 +
 +
 +CTEST2(check_result_s, div){
-+  run_test_a_y(data->parameter, funcname, test_vdiv, ref_vdiv, flop_per_elem);
++  run_test_a_y(data->parameter, funcname, test_vadddiv, ref_vadddiv, flop_per_elem);
 +}
 +
 +CTEST2(check_result_d, div){
-+  run_test_a_y(data->parameter, funcname, test_vdiv, ref_vdiv, flop_per_elem);
++  run_test_a_y(data->parameter, funcname, test_vadddiv, ref_vadddiv, flop_per_elem);
 +}
-diff --git a/test/test_mul.c b/test/test_mul.c
+diff --git a/test/test_addmul.c b/test/test_addmul.c
 new file mode 100644
 index 0000000..a2f27d6
 --- /dev/null
-+++ b/test/test_mul.c
++++ b/test/test_addmul.c
 @@ -0,0 +1,55 @@
 +/* * Copyright (c) 2014, 2015                                          Zhang Xianyi
 + * All rights reserved.
@@ -1189,28 +1219,28 @@ index 0000000..a2f27d6
 +#include <string.h>
 +#include <openvml_reference.h>
 +
-+static char* funcname[4]={"vsMul", "vdMul", NULL, NULL};
++static char* funcname[4]={"vsAddmul", "vdAddmul", NULL, NULL};
 +static double flop_per_elem[4]={1.0, 1.0, 0, 0};
 +
-+static a_y_func_t ref_vmul[] = {
-+  (a_y_func_t)OpenVML_FUNCNAME_REF(vsMul),
-+  (a_y_func_t)OpenVML_FUNCNAME_REF(vdMul),
++static a_y_func_t ref_vaddmul[] = {
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vsAddmul),
++  (a_y_func_t)OpenVML_FUNCNAME_REF(vdAddmul),
 +  NULL,
 +  NULL,
 +};
 +
-+static a_y_func_t test_vmul[] = {
-+  (a_y_func_t)OpenVML_FUNCNAME(vsMul),
-+  (a_y_func_t)OpenVML_FUNCNAME(vdMul),
++static a_y_func_t test_vaddmul[] = {
++  (a_y_func_t)OpenVML_FUNCNAME(vsAddmul),
++  (a_y_func_t)OpenVML_FUNCNAME(vdAddmul),
 +  NULL,
 +  NULL,
 +};
 +
 +
 +CTEST2(check_result_s, mul){
-+  run_test_a_y(data->parameter, funcname, test_vmul, ref_vmul, flop_per_elem);
++  run_test_a_y(data->parameter, funcname, test_vaddmul, ref_vaddmul, flop_per_elem);
 +}
 +
 +CTEST2(check_result_d, mul){
-+  run_test_a_y(data->parameter, funcname, test_vmul, ref_vmul, flop_per_elem);
++  run_test_a_y(data->parameter, funcname, test_vaddmul, ref_vaddmul, flop_per_elem);
 +}

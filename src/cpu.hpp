@@ -14,63 +14,24 @@ namespace Bare
 		template <typename DType>
 		class Variable : public Bare::Variable<DType>
 		{
-			template <typename T> friend CPU::Variable<T>& operator+(CPU::Variable<T>& a, CPU::Variable<T>& b);
-			template <typename T> friend CPU::Variable<T>& operator-(CPU::Variable<T>& a, CPU::Variable<T>& b);
-			template <typename T> friend CPU::Variable<T>& operator*(CPU::Variable<T>& a, CPU::Variable<T>& b);
-			template <typename T> friend CPU::Variable<T>& operator/(CPU::Variable<T>& a, CPU::Variable<T>& b);
-			template <typename T> friend CPU::Variable<T>& sqrt(CPU::Variable<T>& a);
-			template <typename T, typename D> friend CPU::Variable<T>& pow(CPU::Variable<T>& a, D expo);
-
-		public:
-			Variable(Shape shape, DType value = 0, DType adj = 0) :
-				Bare::Variable<DType>(shape)
-			{
-				_values = new DType[shape.prod()];
-				_adjs = new DType[shape.prod()];
-
-				SHAPE_LOOP(shape) {
-					_values[shape.idx(x, y)] = value;
-					_adjs[shape.idx(x, y)] = adj;
-				}
-			}
-
-			virtual ~Variable()
-			{
-				delete[] _values;
-				delete[] _adjs;
-			}
-
-			DType* operator()() override { return _values; }
-			DType* adj() override { return _adjs; }
-
-			void flag() override
-			{
-				// Set all adjacent values to 1
-				SHAPE_LOOP(this->_shape) {
-					_adjs[this->_shape.idx(x, y)] = 1;
-				}
-			}
-
-		protected:
-			DType* _values;
-			DType* _adjs;
+			VARIABLE_INTERFACE(CPU, Variable)
 		};
 
 
 		template <typename DType>
 		CPU::Variable<DType>& operator+(CPU::Variable<DType>& a, CPU::Variable<DType>& b)
 		{
-			auto r = new CPU::Variable<DType>(a._shape);
+			auto r = new CPU::Variable<DType>(a.shape());
 
 			// Do the sum
-			SHAPE_LOOP(a._shape) {
-				r->_values[a._shape.idx(x, y)] = a._values[a._shape.idx(x, y)] + b._values[a._shape.idx(x, y)];
+			SHAPE_LOOP(a.shape()) {
+				r->values(x, y) = a.vales(x, y) + b.values(x, y);
 			}
 
 			Tape::current()->push([&a, &b, r]() {
-				SHAPE_LOOP(a._shape) {
-					a._adjs[a._shape.idx(x, y)] += r->_adjs[a._shape.idx(x, y)];
-					b._adjs[a._shape.idx(x, y)] += r->_adjs[a._shape.idx(x, y)];
+				SHAPE_LOOP(a.shape()) {
+					a.adjoints(x, y) += r->adjoints(x, y);
+					b.adjoints(x, y) += r->adjoints(x, y);
 				}
 			});
 
@@ -80,17 +41,17 @@ namespace Bare
 		template <typename DType>
 		CPU::Variable<DType>& operator-(CPU::Variable<DType>& a, CPU::Variable<DType>& b)
 		{
-			auto r = new CPU::Variable<DType>(a._shape);
+			auto r = new CPU::Variable<DType>(a.shape());
 
 			// Do the sum
-			SHAPE_LOOP(a._shape) {
-				r->_values[a._shape.idx(x, y)] = a._values[a._shape.idx(x, y)] + b._values[a._shape.idx(x, y)];
+			SHAPE_LOOP(a.shape()) {
+				r->values(x, y) = a.values(x, y) - b.values(x, y);
 			}
 
 			Tape::current()->push([&a, &b, r]() {
-				SHAPE_LOOP(a._shape) {
-					a._adjs[a._shape.idx(x, y)] += r->_adjs[a._shape.idx(x, y)];
-					b._adjs[a._shape.idx(x, y)] -= r->_adjs[a._shape.idx(x, y)];
+				SHAPE_LOOP(a.shape()) {
+					a.adjoints(x, y) += r->adjoints(x, y);
+					b.adjoints(x, y) -= r->adjoints(x, y);
 				}
 			});
 
@@ -100,20 +61,20 @@ namespace Bare
 		template <typename DType>
 		CPU::Variable<DType>& operator*(CPU::Variable<DType>& a, CPU::Variable<DType>& b)
 		{
-			auto r = new CPU::Variable<DType>(a._shape);
+			auto r = new CPU::Variable<DType>(a.shape());
 
 			// Do the sum
-			SHAPE_LOOP(a._shape) {
-				r->_values[a._shape.idx(x, y)] = a._values[a._shape.idx(x, y)] * b._values[a._shape.idx(x, y)];
+			SHAPE_LOOP(a.shape()) {
+				r->values(x, y) = a.values(x, y) * b.values(x, y);
 			}
 
-			DType* av = a._values;
-			DType* bv = b._values;
+			DType* av = a.values();
+			DType* bv = b.values();
 
-			Tape::current()->push([av, bv, &a, &b, r]() {
-				SHAPE_LOOP(a._shape) {
-					a._adjs[a._shape.idx(x, y)] += bv[a._shape.idx(x, y)] * r->_adjs[a._shape.idx(x, y)];
-					b._adjs[a._shape.idx(x, y)] += av[a._shape.idx(x, y)] * r->_adjs[a._shape.idx(x, y)];
+			Tape::current()->push([&a, &b, r]() {
+				SHAPE_LOOP(a.shape()) {
+					a.adjoints(x, y) += b.values(x, y) * r->adjoints(x, y);
+					b.adjoints(x, y) += a.values(x, y) * r->adjoints(x, y);
 				}
 			});
 
@@ -123,22 +84,19 @@ namespace Bare
 		template <typename DType>
 		CPU::Variable<DType>& operator/(CPU::Variable<DType>& a, CPU::Variable<DType>& b)
 		{
-			auto r = new CPU::Variable<DType>(a._shape);
+			auto r = new CPU::Variable<DType>(a.shape());
 
 			// Do the sum
-			SHAPE_LOOP(a._shape) {
-				r->_values[a._shape.idx(x, y)] = a._values[a._shape.idx(x, y)] / b._values[a._shape.idx(x, y)];
+			SHAPE_LOOP(a.shape()) {
+				r->values(x, y) = a.values(x, y) / b.values(x, y);
 			}
 
-			DType* av = a._values;
-			DType* bv = b._values;
+			Tape::current()->push([&a, &b, r]() {
+				SHAPE_LOOP(a.shape()) {
+					auto bv2 = b.values(x, y) * b.values(x, y);
 
-			Tape::current()->push([av, bv, &a, &b, r]() {
-				SHAPE_LOOP(a._shape) {
-					auto bv2 = bv[a._shape.idx(x, y)] * bv[a._shape.idx(x, y)];
-
-					a._adjs[a._shape.idx(x, y)] += (bv[a._shape.idx(x, y)] * r->_adjs[a._shape.idx(x, y)]) / bv2;
-					b._adjs[a._shape.idx(x, y)] -= (av[a._shape.idx(x, y)] * r->_adjs[a._shape.idx(x, y)]) / bv2;
+					a.adjoints(x, y) += b.values(x, y) * r->adjoints(x, y) / bv2;
+					b.adjoints(x, y) -= a.values(x, y) * r->adjoints(x, y) / bv2;
 				}
 			});
 
@@ -148,19 +106,19 @@ namespace Bare
 		template <typename DType>
 		CPU::Variable<DType>& sqrt(CPU::Variable<DType>& a)
 		{
-			auto r = new CPU::Variable<DType>(a._shape);
+			auto r = new CPU::Variable<DType>(a.shape());
 
 			// Do the sum
-			SHAPE_LOOP(a._shape) {
-				r->_values[a._shape.idx(x, y)] = std::sqrt(a._values[a._shape.idx(x, y)]);
+			SHAPE_LOOP(a.shape()) {
+				r->values(x, y) = std::sqrt(a.values(x, y));
 			}
 
 			DType* rv = r->_values;
 			DType* adjs = r->_adjs;
 
-			Tape::current()->push([rv, &a, adjs]() {
-				SHAPE_LOOP(a._shape) {
-					a._adj[a._shape.idx(x, y)] += adjs[a._shape.idx(x, y)] / (DType(2.0) * rv[a._shape.idx(x, y)]);
+			Tape::current()->push([&a, r]() {
+				SHAPE_LOOP(a.shape()) {
+					a.adjoints(x, y) += r->adjoints(x, y) / (DType(2.0) * r->values(x, y));
 				}
 			});
 
@@ -170,20 +128,20 @@ namespace Bare
 		template <typename DType, typename D>
 		CPU::Variable<DType>& pow(CPU::Variable<DType>& a, D expo)
 		{
-			auto r = new CPU::Variable<DType>(a._shape);
+			auto r = new CPU::Variable<DType>(a.shape());
 
 			// Do the sum
-			SHAPE_LOOP(a._shape) {
-				r->_values[a._shape.idx(x, y)] = std::pow(a._values[a._shape.idx(x, y)], expo);
+			SHAPE_LOOP(a.shape()) {
+				r->values(x, y) = std::pow(a->values(x, y), expo);
 			}
 
 			DType* rv = r->_values;
 			DType* adjs = r->_adjs;
 			DType* av = a._values;
 
-			Tape::current()->push([rv, &a, av, adjs, expo]() {
-				SHAPE_LOOP(a._shape) {
-					a._adjs[a._shape.idx(x, y)] += adjs[a._shape.idx(x, y)] * expo * std::pow(av[a._shape.idx(x, y)], DType(expo - 1));
+			Tape::current()->push([&a, r, expo]() {
+				SHAPE_LOOP(a.shape()) {
+					a->adjoints(x, y) += r->adjoints(x, y) * expo * std::pow(a.values(x, y), DType(expo - 1));
 				}
 			});
 

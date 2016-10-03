@@ -18,7 +18,8 @@ struct Shape
 	int n;
 };
 
-#define SHAPE_LOOP(shape) for (int y = 0; y < shape.m; ++y) for (int x = 0; x < shape.n; ++x)
+#define SHAPE_LOOP(shape) for (int y = 0; y < (shape).m; ++y) for (int x = 0; x < (shape).n; ++x)
+#define CIDX(shape) shape[{x, y}]
 
 namespace Bare
 {
@@ -28,19 +29,89 @@ namespace Bare
 	public:
 		explicit Variable(Shape shape):
 			_shape(shape)
-		{}
+		{
+			_values = new DType[shape.prod()];
+			_adjs = new DType[shape.prod()];
+		}
+
+		Variable(Shape shape, DType value, DType adj):
+			Variable(shape)
+		{
+			SHAPE_LOOP(shape) {
+				values(x, y) = value;
+				adjoints(x, y) = adj;
+			}
+		}
+
+		Variable(Variable& var, DType adj):
+			Variable(var.shape())
+		{
+			SHAPE_LOOP(var.shape()) {
+				values(x, y) = var.values(x, y);
+				adjoints(x, y) = adj;
+			}
+		}
+
+		Variable(Variable& var, int x0, int y0, DType adj):
+			Variable(var.shape())
+		{
+			SHAPE_LOOP(var.shape()) {
+				values(x, y) = var.values(x + x0, y + y0);
+				adjoints(x, y) = adj;
+			}
+		}
 
 		virtual ~Variable()
-		{}
+		{
+			delete[] this->_values;
+			delete[] this->_adjs;
+		}
 
-		virtual DType* operator()() = 0;
-		virtual DType* adj() = 0;
-		virtual void flag() = 0;
+		inline DType* values() { return _values; }
+		inline DType& values(int x, int y) { return _values[_shape[{x, y}]]; }
+
+		inline DType* adjoints() { return _adjs; }
+		inline DType& adjoints(int x, int y) { return _adjs[_shape[{x, y}]]; }
+
+		virtual inline void flag()
+		{
+			SHAPE_LOOP(shape())
+			{
+				adjoints()[shape()[{x, y}]] = 1;
+			}
+		}
 
 
-        Shape& shape() { return _shape; }
+        inline Shape& shape() { return _shape; }
 
 	protected:
 		Shape _shape;
+
+		DType* _values = nullptr;
+		DType* _adjs = nullptr;
 	};
 }
+
+
+#define VARIABLE_INTERFACE(ns,name) \
+	template <typename T> friend ns::name<T>& operator+(ns::name<T>& a, ns::name<T>& b);\
+	template <typename T> friend ns::name<T>& operator-(ns::name<T>& a, ns::name<T>& b);\
+	template <typename T> friend ns::name<T>& operator*(ns::name<T>& a, ns::name<T>& b);\
+	template <typename T> friend ns::name<T>& operator/(ns::name<T>& a, ns::name<T>& b);\
+	template <typename T> friend ns::name<T>& transpose(ns::name<T>& a);\
+	template <typename T> friend ns::name<T>& sqrt(ns::name<T>& a);\
+	template <typename T, typename D> friend ns::name<T>& pow(ns::name<T>& a, D expo);\
+	template <typename T> friend ns::name<T>& mul(ns::name<T>& a, ns::name<T>& b);\
+public:\
+	explicit name(Shape shape): \
+		Bare::Variable<DType>(shape) \
+	{}\
+	name(Shape shape, DType value, DType adj=0): \
+		Bare::Variable<DType>(shape, value, adj)\
+	{}\
+	name(Variable& var, DType adj=0):\
+		Bare::Variable<DType>(var, adj)\
+	{}\
+	name(Variable& var, int x0, int y0, DType adj=0):\
+		Bare::Variable<DType>(var, x0, y0, adj)\
+	{}
