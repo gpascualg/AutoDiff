@@ -43,6 +43,8 @@ int main()
 
 	auto& r = x + y + z - z*y + mul(x, y);
 
+	auto r2 = slice(r, 2, 2, 2, 2);
+
 	printf("r:\n");
 	matprint(r.shape(), r.values());
 

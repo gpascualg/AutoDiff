@@ -243,6 +243,13 @@ namespace Bare
 
 			return *r;
 		}
+
+		template <typename DType>
+		BLAS::Variable<DType>& slice(BLAS::Variable<DType>& a, int x0, int y0, int dx, int dy)
+		{
+			auto r = new BLAS::Variable<DType>(a, x0, y0, dx, dy);
+			return *r;
+		}
 	}
 }
 

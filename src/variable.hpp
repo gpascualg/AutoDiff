@@ -52,19 +52,23 @@ namespace Bare
 			}
 		}
 
-		Variable(Variable& var, int x0, int y0, DType adj):
-			Variable(var.shape())
+		// Slice/Index operator
+		Variable(Variable& var, int x0, int y0, int dx, int dy):
+			_shape({dx, dy})
 		{
-			SHAPE_LOOP(var.shape()) {
-				values(x, y) = var.values(x + x0, y + y0);
-				adjoints(x, y) = adj;
-			}
+			int start = var.shape()[{x0, y0}];
+			_values = var._values + start;
+			_adjs = var._adjs + start;
+			_deleteOnDestructor = false;
 		}
 
 		virtual ~Variable()
 		{
-			delete[] this->_values;
-			delete[] this->_adjs;
+			if (_deleteOnDestructor)
+			{
+				delete[] this->_values;
+				delete[] this->_adjs;
+			}
 		}
 
 		inline DType* values() { return _values; }
@@ -87,6 +91,7 @@ namespace Bare
 	protected:
 		Shape _shape;
 
+		bool _deleteOnDestructor = true;
 		DType* _values = nullptr;
 		DType* _adjs = nullptr;
 	};
@@ -102,6 +107,7 @@ namespace Bare
 	template <typename T> friend ns::name<T>& sqrt(ns::name<T>& a);\
 	template <typename T, typename D> friend ns::name<T>& pow(ns::name<T>& a, D expo);\
 	template <typename T> friend ns::name<T>& mul(ns::name<T>& a, ns::name<T>& b);\
+	template <typename T> friend ns::name<T>& slice(ns::name<T>& a, int x0, int y0, int dx, int dy);\
 public:\
 	explicit name(Shape shape): \
 		Bare::Variable<DType>(shape) \
@@ -112,6 +118,6 @@ public:\
 	name(Variable& var, DType adj=0):\
 		Bare::Variable<DType>(var, adj)\
 	{}\
-	name(Variable& var, int x0, int y0, DType adj=0):\
-		Bare::Variable<DType>(var, x0, y0, adj)\
+	name(Variable& var, int x0, int y0, int dx, int dy):\
+		Bare::Variable<DType>(var, x0, y0, dx, dy)\
 	{}
