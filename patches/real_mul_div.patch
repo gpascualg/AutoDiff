@@ -5,7 +5,7 @@ index 09cc02f..f5a8ade 100644
 @@ -46,6 +46,12 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
  OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 +OPENVML_EXPORT void OpenVML_FUNCNAME(vsAddmul)(const VML_INT n, const float * a, const float * b, float * y);
 +OPENVML_EXPORT void OpenVML_FUNCNAME(vdAddmul)(const VML_INT n, const double * a, const double * b, double * y);
 +
@@ -14,7 +14,7 @@ index 09cc02f..f5a8ade 100644
 +
  OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
 index f4d8e94..23c4255 100644
 --- a/include/openvml_kernel.h
@@ -22,13 +22,13 @@ index f4d8e94..23c4255 100644
 @@ -41,6 +41,11 @@ void OpenVML_FUNCNAME(dsub_k)(VMLLONG n, double * a, double * b, double * y, dou
  void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
-
+ 
 +void OpenVML_FUNCNAME(saddmul_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
 +void OpenVML_FUNCNAME(daddmul_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
 +
 +void OpenVML_FUNCNAME(sadddiv_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
 +void OpenVML_FUNCNAME(dadddiv_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
-
+ 
  void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
 diff --git a/include/openvml_macros.h b/include/openvml_macros.h
@@ -38,7 +38,7 @@ index eef53cf..7796275 100644
 @@ -43,6 +43,12 @@
  #define CSUB_K OpenVML_FUNCNAME(csub_k)
  #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
-
+ 
 +#define SADDMUL_K OpenVML_FUNCNAME(saddmul_k)
 +#define DADDMUL_K OpenVML_FUNCNAME(daddmul_k)
 +
@@ -73,7 +73,7 @@ index fdb0beb..e6b622e 100644
 @@ -46,6 +46,12 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSub)(const VML_INT n, const double *
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 +OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsAddmul)(const VML_INT n, const float * a, const float * b, float * y);
 +OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdAddmul)(const VML_INT n, const double * a, const double * b, double * y);
 +
@@ -82,7 +82,7 @@ index fdb0beb..e6b622e 100644
 +
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 diff --git a/interface/CMakeLists.txt b/interface/CMakeLists.txt
 index de9f6b3..22607ac 100644
 --- a/interface/CMakeLists.txt
@@ -90,7 +90,7 @@ index de9f6b3..22607ac 100644
 @@ -5,11 +5,11 @@ set(OpenVML_LIBSRC_D "")
  set(OpenVML_LIBSRC_C "")
  set(OpenVML_LIBSRC_Z "")
-
+ 
 -set(REAL_INTERFACE_LIST
 -  add sub
 -  pow powx pow2o3 pow3o2 exp expm1
@@ -106,74 +106,74 @@ index de9f6b3..22607ac 100644
  set(COMPLEX_INTERFACE_LIST add sub)
 @@ -38,12 +38,12 @@ foreach(INTERFACE ${REAL_INTERFACE_LIST})
    cap_string(${INTERFACE} OpenVML_INTERFACE_NAME)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vs${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vs${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
-
+ 
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c
      DEPENDS ${INTERFACE}.c
 @@ -51,12 +51,12 @@ foreach(INTERFACE ${REAL_INTERFACE_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_d.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vd${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vd${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
-
+ 
  endforeach(INTERFACE)
-
+ 
 @@ -84,12 +84,12 @@ foreach(INTERFACE ${COMPLEX_INTERFACE_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_c.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_c.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_c.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vc${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vc${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
-
+ 
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c
      DEPENDS ${INTERFACE}.c
 @@ -97,15 +97,15 @@ foreach(INTERFACE ${COMPLEX_INTERFACE_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE}_z.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vz${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS CNAME=${OpenVML_FUNC_PREFIX}vz${OpenVML_INTERFACE_NAME}${OpenVML_FUNC_SUFFIX} )
-
+ 
  Endforeach(INTERFACE)
-
+ 
  add_library(openvml_interface_core OBJECT ${OpenVML_LIBSRC_S} ${OpenVML_LIBSRC_D} ${OpenVML_LIBSRC_C} ${OpenVML_LIBSRC_Z} ${OpenVML_LIBSRC_OTHER})
-
+ 
 -target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
@@ -273,86 +273,86 @@ index 51ba9a9..ed99f17 100644
 +++ b/kernel/CMakeLists.txt
 @@ -7,11 +7,11 @@ set(OpenVML_LIBSRC_C "")
  set(OpenVML_LIBSRC_Z "")
-
+ 
  #s,d
 -set(KERNEL_LIST add sub pow powx exp expm1 tanh log10 ln log1p floor
 +set(KERNEL_LIST add sub addmul adddiv pow powx exp expm1 tanh log10 ln log1p floor
    sin cos sincos tan asin acos atan atan2)
-
+ 
  #c,z
 -set(Z_KERNEL_LIST add sub)
 +set(Z_KERNEL_LIST add sub)
  ######## s,d kernels
-
+ 
  foreach(KERNEL ${KERNEL_LIST})
 @@ -35,12 +35,12 @@ foreach(KERNEL ${KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_s_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_s_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_S_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_s_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}s${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}s${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
-
+ 
    set(D_KERNEL_SOURCE ${${KERNEL}_D_KERNEL_SOURCE})
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 @@ -49,12 +49,12 @@ foreach(KERNEL ${KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_D_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_d_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}d${KERNEL}_k${OpenVML_FUNC_SUFFIX})
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}d${KERNEL}_k${OpenVML_FUNC_SUFFIX})
-
+ 
  endforeach(KERNEL)
-
+ 
 @@ -83,12 +83,12 @@ foreach(KERNEL ${Z_KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_c_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_c_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_C_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_c_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}c${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}c${KERNEL}_k${OpenVML_FUNC_SUFFIX} )
-
+ 
    set(Z_KERNEL_SOURCE ${${KERNEL}_Z_KERNEL_SOURCE})
    add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 @@ -97,12 +97,12 @@ foreach(KERNEL ${Z_KERNEL_LIST})
      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c)
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS ${OpenVML_Z_DEFINITIONS} )
-
+ 
    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${KERNEL}_kernel_z_${OpenVML_ARCH}_${OpenVML_CPU_CORENAME}.c
 -    APPEND
 -    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}z${KERNEL}_k${OpenVML_FUNC_SUFFIX})
 +    APPEND
 +    PROPERTY COMPILE_DEFINITIONS KERNEL_NAME=${OpenVML_FUNC_PREFIX}z${KERNEL}_k${OpenVML_FUNC_SUFFIX})
-
+ 
  endforeach(KERNEL)
-
+ 
 diff --git a/kernel/aarch64/Kernel_generic.txt b/kernel/aarch64/Kernel_generic.txt
 index 9a15eca..957348c 100644
 --- a/kernel/aarch64/Kernel_generic.txt
@@ -360,7 +360,7 @@ index 9a15eca..957348c 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
-
+ 
 +set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
 +set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
@@ -369,7 +369,7 @@ index 9a15eca..957348c 100644
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
-
+ 
 diff --git a/kernel/arm/Kernel_generic.txt b/kernel/arm/Kernel_generic.txt
 index 9a15eca..957348c 100644
 --- a/kernel/arm/Kernel_generic.txt
@@ -377,7 +377,7 @@ index 9a15eca..957348c 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
-
+ 
 +set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
 +set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
@@ -386,7 +386,7 @@ index 9a15eca..957348c 100644
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
-
+ 
 diff --git a/kernel/generic/Kernel_generic.txt b/kernel/generic/Kernel_generic.txt
 index fa9fed5..bd709f2 100644
 --- a/kernel/generic/Kernel_generic.txt
@@ -394,7 +394,7 @@ index fa9fed5..bd709f2 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
-
+ 
 +set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
 +set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
@@ -489,7 +489,7 @@ index dee6831..8d97693 100644
 @@ -8,6 +8,12 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
-
+ 
 +set(addmul_S_KERNEL_SOURCE generic/addmul_kernel.c)
 +set(addmul_D_KERNEL_SOURCE generic/addmul_kernel.c)
 +
@@ -498,7 +498,7 @@ index dee6831..8d97693 100644
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
-
+ 
 diff --git a/kernel/x86_64/Kernel_haswell.txt b/kernel/x86_64/Kernel_haswell.txt
 index 81fd684..3830402 100644
 --- a/kernel/x86_64/Kernel_haswell.txt
@@ -506,7 +506,7 @@ index 81fd684..3830402 100644
 @@ -16,6 +16,12 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
-
+ 
 +set(addmul_S_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
 +set(addmul_D_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
 +
@@ -515,7 +515,7 @@ index 81fd684..3830402 100644
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
-
+ 
 diff --git a/kernel/x86_64/Kernel_sandybridge.txt b/kernel/x86_64/Kernel_sandybridge.txt
 index 55e5a05..0d31db2 100644
 --- a/kernel/x86_64/Kernel_sandybridge.txt
@@ -523,7 +523,7 @@ index 55e5a05..0d31db2 100644
 @@ -16,6 +16,12 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
-
+ 
 +set(addmul_S_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
 +set(addmul_D_KERNEL_SOURCE ${OpenVML_ARCH}/addmul_kernel.c)
 +
@@ -532,7 +532,7 @@ index 55e5a05..0d31db2 100644
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
-
+ 
 diff --git a/kernel/x86_64/dadddiv_kernel_avx.c b/kernel/x86_64/dadddiv_kernel_avx.c
 new file mode 100644
 index 0000000..a2f27d6
@@ -991,7 +991,7 @@ index dddc5db..2f8e10c 100644
 @@ -27,4 +29,4 @@ if(NOT MSVC)
  target_link_libraries(${OpenVML_LIBNAME}_ref m)
  endif()
-
+ 
 -target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)

@@ -2,7 +2,7 @@ From e31e919a962051317db885fe4861972c4d49fd7d Mon Sep 17 00:00:00 2001
 From: xinhuang <xinhuang.abc@gmail.com>
 Date: Sat, 10 Sep 2016 15:09:08 +0800
 Subject: [PATCH 1/2] generic vsSqr
-
+ 
 ---
  include/openvml.h           |  2 ++
  include/openvml_kernel.h    |  1 +
@@ -14,7 +14,7 @@ Subject: [PATCH 1/2] generic vsSqr
  7 files changed, 104 insertions(+)
  create mode 100644 kernel/generic/sqr_kernel.c
  create mode 100644 test/test_sqr.c
-
+ 
 diff --git a/include/openvml.h b/include/openvml.h
 index 09cc02f..ede1f95 100644
 --- a/include/openvml.h
@@ -22,12 +22,12 @@ index 09cc02f..ede1f95 100644
 @@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
  OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 +OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
 +
  OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
 index f4d8e94..8f2a34e 100644
 --- a/include/openvml_kernel.h
@@ -35,9 +35,9 @@ index f4d8e94..8f2a34e 100644
 @@ -41,6 +41,7 @@ void OpenVML_FUNCNAME(dsub_k)(VMLLONG n, double * a, double * b, double * y, dou
  void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
-
+ 
 +void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
-
+ 
  void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
 diff --git a/include/openvml_macros.h b/include/openvml_macros.h
@@ -47,7 +47,7 @@ index eef53cf..0e7091b 100644
 @@ -43,6 +43,8 @@
  #define CSUB_K OpenVML_FUNCNAME(csub_k)
  #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
-
+ 
 +#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
 +
  #define SPOW_K OpenVML_FUNCNAME(spow_k)
@@ -60,12 +60,12 @@ index fdb0beb..2af4525 100644
 @@ -46,6 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSub)(const VML_INT n, const double *
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 +OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
 +
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 diff --git a/kernel/generic/sqr_kernel.c b/kernel/generic/sqr_kernel.c
 new file mode 100644
 index 0000000..225e667
@@ -186,12 +186,12 @@ index 0000000..806911a
 +CTEST2(check_result_z, sqr){
 +  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
 +}
-
+ 
 From 5ef9a2fdc9fd96329e5dbfb669139227546c49c2 Mon Sep 17 00:00:00 2001
 From: xinhuang <xinhuang.abc@gmail.com>
 Date: Sat, 10 Sep 2016 16:59:11 +0800
 Subject: [PATCH 2/2] implement v?Sqr as y =__mm256_mul_pd(a, a)
-
+ 
 ---
  include/openvml.h                    |  3 +-
  include/openvml_kernel.h             |  1 +
@@ -218,7 +218,7 @@ Subject: [PATCH 2/2] implement v?Sqr as y =__mm256_mul_pd(a, a)
  create mode 100644 kernel/x86_64/sqr_kernel.c
  create mode 100644 kernel/x86_64/ssqr_kernel_avx.c
  create mode 100644 reference/vsqr.c
-
+ 
 diff --git a/include/openvml.h b/include/openvml.h
 index ede1f95..883a480 100644
 --- a/include/openvml.h
@@ -226,11 +226,11 @@ index ede1f95..883a480 100644
 @@ -46,7 +46,8 @@ OPENVML_EXPORT void OpenVML_FUNCNAME(vdSub)(const VML_INT n, const double * a, c
  OPENVML_EXPORT void OpenVML_FUNCNAME(vcSub)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
 -OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const double * a, double * y);
 +OPENVML_EXPORT void OpenVML_FUNCNAME(vsSqr)(const VML_INT n, const float * a, float * y);
 +OPENVML_EXPORT void OpenVML_FUNCNAME(vdSqr)(const VML_INT n, const double * a, double * y);
-
+ 
  OPENVML_EXPORT void OpenVML_FUNCNAME(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
 diff --git a/include/openvml_kernel.h b/include/openvml_kernel.h
@@ -239,10 +239,10 @@ index 8f2a34e..fdc87ff 100644
 +++ b/include/openvml_kernel.h
 @@ -42,6 +42,7 @@ void OpenVML_FUNCNAME(csub_k)(VMLLONG n, float * a, float * b, float * y, float
  void OpenVML_FUNCNAME(zsub_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
-
+ 
  void OpenVML_FUNCNAME(ssqr_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
 +void OpenVML_FUNCNAME(sdqr_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
-
+ 
  void OpenVML_FUNCNAME(spow_k)(VMLLONG n, float * a, float * b, float * y, float * z, float * other_params);
  void OpenVML_FUNCNAME(dpow_k)(VMLLONG n, double * a, double * b, double * y, double * z, double * other_params);
 diff --git a/include/openvml_macros.h b/include/openvml_macros.h
@@ -252,11 +252,11 @@ index 0e7091b..ff8a166 100644
 @@ -43,7 +43,8 @@
  #define CSUB_K OpenVML_FUNCNAME(csub_k)
  #define ZSUB_K OpenVML_FUNCNAME(zsub_k)
-
+ 
 -#define ZSQR_K OpenVML_FUNCNAME(ssqr_k)
 +#define SSQR_K OpenVML_FUNCNAME(ssqr_k)
 +#define DSQR_K OpenVML_FUNCNAME(dsqr_k)
-
+ 
  #define SPOW_K OpenVML_FUNCNAME(spow_k)
  #define DPOW_K OpenVML_FUNCNAME(dpow_k)
 @@ -116,6 +117,7 @@
@@ -281,10 +281,10 @@ index 2af4525..773dc2b 100644
 +++ b/include/openvml_reference.h
 @@ -47,6 +47,7 @@ OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vcSub)(const VML_INT n, const float * a
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vzSub)(const VML_INT n, const double * a, const double * b, double * y);
-
+ 
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsSqr)(const VML_INT n, const float * a, float * y);
 +OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdSqr)(const VML_INT n, const double * a, double * y);
-
+ 
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vsPow)(const VML_INT n, const float * a, const float * b, float * y);
  OPENVML_EXPORT void OpenVML_FUNCNAME_REF(vdPow)(const VML_INT n, const double * a, const double * b, double * y);
 diff --git a/interface/CMakeLists.txt b/interface/CMakeLists.txt
@@ -293,7 +293,7 @@ index de9f6b3..433652c 100644
 +++ b/interface/CMakeLists.txt
 @@ -6,7 +6,7 @@ set(OpenVML_LIBSRC_C "")
  set(OpenVML_LIBSRC_Z "")
-
+ 
  set(REAL_INTERFACE_LIST
 -  add sub
 +  add sub sqr
@@ -301,9 +301,9 @@ index de9f6b3..433652c 100644
    tanh
    log10 ln log1p
 @@ -108,4 +108,4 @@ Endforeach(INTERFACE)
-
+ 
  add_library(openvml_interface_core OBJECT ${OpenVML_LIBSRC_S} ${OpenVML_LIBSRC_D} ${OpenVML_LIBSRC_C} ${OpenVML_LIBSRC_Z} ${OpenVML_LIBSRC_OTHER})
-
+ 
 -target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(openvml_interface_core PUBLIC openvml_EXPORTS)
@@ -358,12 +358,12 @@ index 51ba9a9..45bb201 100644
 +++ b/kernel/CMakeLists.txt
 @@ -7,7 +7,7 @@ set(OpenVML_LIBSRC_C "")
  set(OpenVML_LIBSRC_Z "")
-
+ 
  #s,d
 -set(KERNEL_LIST add sub pow powx exp expm1 tanh log10 ln log1p floor
 +set(KERNEL_LIST add sub sqr pow powx exp expm1 tanh log10 ln log1p floor
    sin cos sincos tan asin acos atan atan2)
-
+ 
  #c,z
 diff --git a/kernel/aarch64/Kernel_generic.txt b/kernel/aarch64/Kernel_generic.txt
 index 9a15eca..c90b7e6 100644
@@ -372,13 +372,13 @@ index 9a15eca..c90b7e6 100644
 @@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
-
+ 
 +set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
 +set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
-
+ 
 diff --git a/kernel/arm/Kernel_generic.txt b/kernel/arm/Kernel_generic.txt
 index 9a15eca..c90b7e6 100644
 --- a/kernel/arm/Kernel_generic.txt
@@ -386,13 +386,13 @@ index 9a15eca..c90b7e6 100644
 @@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
-
+ 
 +set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
 +set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
-
+ 
 diff --git a/kernel/generic/Kernel_generic.txt b/kernel/generic/Kernel_generic.txt
 index fa9fed5..70c08f2 100644
 --- a/kernel/generic/Kernel_generic.txt
@@ -400,7 +400,7 @@ index fa9fed5..70c08f2 100644
 @@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/sub_kernel.c)
-
+ 
 +set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
 +set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/sqr_kernel.c)
 +
@@ -414,13 +414,13 @@ index dee6831..0c7244e 100644
 @@ -8,6 +8,9 @@ set(sub_D_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_C_KERNEL_SOURCE generic/sub_kernel.c)
  set(sub_Z_KERNEL_SOURCE generic/sub_kernel.c)
-
+ 
 +set(sqr_S_KERNEL_SOURCE generic/sqr_kernel.c)
 +set(sqr_D_KERNEL_SOURCE generic/sqr_kernel.c)
 +
  set(pow_S_KERNEL_SOURCE generic/pow_kernel.c)
  set(pow_D_KERNEL_SOURCE generic/pow_kernel.c)
-
+ 
 diff --git a/kernel/x86_64/Kernel_haswell.txt b/kernel/x86_64/Kernel_haswell.txt
 index 81fd684..63f42d6 100644
 --- a/kernel/x86_64/Kernel_haswell.txt
@@ -428,13 +428,13 @@ index 81fd684..63f42d6 100644
 @@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
-
+ 
 +set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
 +set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
-
+ 
 diff --git a/kernel/x86_64/Kernel_sandybridge.txt b/kernel/x86_64/Kernel_sandybridge.txt
 index 55e5a05..3e33a1c 100644
 --- a/kernel/x86_64/Kernel_sandybridge.txt
@@ -442,13 +442,13 @@ index 55e5a05..3e33a1c 100644
 @@ -16,6 +16,9 @@ set(sub_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
  set(sub_C_KERNEL_SOURCE ${OpenVML_ARCH}/ssub_kernel_avx.c)
  set(sub_Z_KERNEL_SOURCE ${OpenVML_ARCH}/dsub_kernel_avx.c)
-
+ 
 +set(sqr_S_KERNEL_SOURCE ${OpenVML_ARCH}/ssqr_kernel_avx.c)
 +set(sqr_D_KERNEL_SOURCE ${OpenVML_ARCH}/dsqr_kernel_avx.c)
 +
  set(pow_S_KERNEL_SOURCE ${OpenVML_ARCH}/spow_kernel_avx.c)
  set(pow_D_KERNEL_SOURCE ${OpenVML_ARCH}/dpow_kernel_avx.c)
-
+ 
 diff --git a/kernel/x86_64/dsqr_kernel_avx.c b/kernel/x86_64/dsqr_kernel_avx.c
 new file mode 100644
 index 0000000..9a94e47
@@ -657,7 +657,7 @@ index dddc5db..4acb0c8 100644
 @@ -27,4 +28,4 @@ if(NOT MSVC)
  target_link_libraries(${OpenVML_LIBNAME}_ref m)
  endif()
-
+ 
 -target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
 \ No newline at end of file
 +target_compile_definitions(${OpenVML_LIBNAME}_ref PUBLIC openvml_EXPORTS)
@@ -723,12 +723,12 @@ index 806911a..bd45d41 100644
 @@ -28,21 +28,21 @@
  #include <string.h>
  #include <openvml_reference.h>
-
+ 
 -static char* funcname[4]={"vsSqr", "vdSqr", "vcSqr","vzSqr"};
 -static double flop_per_elem[4]={1.0, 1.0, 2.0, 2.0};
 +static char* funcname[4]={"vsSqr", "vdSqr", NULL, NULL};
 +static double flop_per_elem[4]={1.0, 1.0, 0, 0};
-
+ 
  static a_y_func_t ref_vsqr[] = {
    (a_y_func_t)OpenVML_FUNCNAME_REF(vsSqr),
    (a_y_func_t)OpenVML_FUNCNAME_REF(vdSqr),
@@ -737,7 +737,7 @@ index 806911a..bd45d41 100644
 +  NULL,
 +  NULL,
  };
-
+ 
  static a_y_func_t test_vsqr[] = {
    (a_y_func_t)OpenVML_FUNCNAME(vsSqr),
    (a_y_func_t)OpenVML_FUNCNAME(vdSqr),
@@ -746,12 +746,12 @@ index 806911a..bd45d41 100644
 +  NULL,
 +  NULL,
  };
-
+ 
 
 @@ -54,10 +54,3 @@ CTEST2(check_result_d, sqr){
    run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
  }
-
+ 
 -CTEST2(check_result_c, sqr){
 -  run_test_a_y(data->parameter, funcname, test_vsqr, ref_vsqr, flop_per_elem);
 -}

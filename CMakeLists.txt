@@ -19,6 +19,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 option(WITH_UNOPTIMIZED_CPU_SUPPORT "Build with unoptimized CPU support" ON)
 option(WITH_BLAS_SUPPORT "Build with OpenBLAS and OpenVML" ON)
 option(BUILD_DEBUG "Build with debug enabled" OFF)
+option(BUILD_PYTHON "Build Python wrapper" ON)
 
 if (BUILD_DEBUG)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Debug;Release;RelWithDebInfo" FORCE)
@@ -26,3 +27,7 @@ endif()
 
 # -[ Start including
 add_subdirectory(src)
+
+if (BUILD_PYTHON)
+    add_subdirectory(python)
+endif()
