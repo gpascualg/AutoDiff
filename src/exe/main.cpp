@@ -2,10 +2,10 @@
 #include <vector>
 #include <functional>
 
-#include "variable.hpp"
-#include "cpu.hpp"
-#include "blas.hpp"
-#include "tape.hpp"
+#include <variable.hpp>
+#include <cpu.hpp>
+#include <blas.hpp>
+#include <tape.hpp>
 
 using namespace F32::BLAS;
 
@@ -41,9 +41,30 @@ int main()
 
 	x.values()[3] = 5;
 
-	auto& r = x + y + z - z*y + mul(x, y);
+	auto& r = x + y + z;
 
 	auto r2 = slice(r, 2, 2, 2, 2);
+
+	printf("r:\n");
+	matprint(r.shape(), r.values());
+
+	//getchar();
+
+	r.flag();
+
+	Tape::current()->execute();
+
+	printf("X:\n");
+	matprint(x.shape(), x.adjoints());
+
+	printf("Y:\n");
+	matprint(y.shape(), y.adjoints());
+
+	printf("Z:\n");
+	matprint(z.shape(), z.adjoints());
+
+	// Again!
+	r = x + y + z;
 
 	printf("r:\n");
 	matprint(r.shape(), r.values());

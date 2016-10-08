@@ -4,8 +4,13 @@ RequireExternal(
     TARGET AutoDiff-Python
     EXCLUDE
     MODULE pybind/pybind11:master
+    CONFIGURE_COMMAND "${CMAKE_COMMAND} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DPYTHON_LIBRARY=${PYTHON_LIBRARY} -DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE_DIR} ."
     INC_PATH "include"
 )
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/tools/")
+set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
+find_package(PythonLibsNew ${PYBIND11_PYTHON_VERSION} REQUIRED)
 
 AddToSources(
    TARGET AutoDiff-Python
@@ -13,23 +18,33 @@ AddToSources(
    GLOB_SEARCH ".hpp;.cpp"
 )
 
-find_library(PYBIND11_LIB
-    NAMES openvml
-    HINTS ${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11-build/lib
-    PATH_SUFFIXES Debug Release
-    NO_DEFAULT_PATH
+
+# -[ Add dependencies
+set(INCLUDE_DIRS
+    ${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/include
+    ${PYTHON_INCLUDE_DIRS}
+)
+foreach (path ${INCLUDE_DIRS})
+    AddToSources(
+        TARGET AutoDiff-Python
+        INC_PATH ${path}
+    )
+endforeach()
+
+# AutoDiff dependency
+AddDependency(
+    TARGET AutoDiff-Python
+    DEPENDENCY AutoDiff-Lib
 )
 
-if (PYBIND11_LIB)
-    # -[ Add dependencies
-    AddDependency(
-        TARGET AutoDiff-Python
-        DEPENDENCY ${PYBIND11_LIB}
-    )
 
-    BuildNow(
-       TARGET AutoDiff-Python
-       SHARED_LIB
-       OUTPUT_NAME AutoDiff
-    )
+BuildNow(
+   TARGET AutoDiff-Python
+   SHARED_LIB
+   NO_PREFIX
+   OUTPUT_NAME autodiff
+)
+
+if (BUILD_PYTHON_TESTS)
+    add_custom_target(BuildPythonDeps ALL DEPENDS pybind_pybind11)
 endif()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "config.h"
+
 struct Shape
 {
 	explicit constexpr Shape() : Shape(0, 0) {}
@@ -33,6 +35,10 @@ namespace Bare
 			_values = new DType[shape.prod()];
 			_adjs = new DType[shape.prod()];
 		}
+
+		Variable(int m, int n):
+			Variable(Shape {m, n})
+		{}
 
 		Variable(Shape shape, DType value, DType adj):
 			Variable(shape)
@@ -111,6 +117,9 @@ namespace Bare
 public:\
 	explicit name(Shape shape): \
 		Bare::Variable<DType>(shape) \
+	{}\
+	name(int m, int n): \
+		Bare::Variable<DType>(m, n)\
 	{}\
 	name(Shape shape, DType value, DType adj=0): \
 		Bare::Variable<DType>(shape, value, adj)\

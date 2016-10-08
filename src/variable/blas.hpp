@@ -1,8 +1,9 @@
-#ifdef WITH_BLAS_SUPPORT
-
 #pragma once
 
 #include "variable.hpp"
+
+#ifdef WITH_BLAS_SUPPORT
+
 #include "tape.hpp"
 
 #include <functional>

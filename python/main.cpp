@@ -1,15 +1,18 @@
 #include <pybind11/pybind11.h>
-
-int add(int i, int j) {
-    return i + j;
-}
+#include <variable.hpp>
+#include <blas.hpp>
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(example) {
-    py::module m("example", "pybind11 example plugin");
+PYBIND11_PLUGIN(autodiff) {
+    py::module m("autodiff", "AutoDiff Python bindings");
 
-    m.def("add", &add, "A function which adds two numbers");
+#ifdef WITH_BLAS_SUPPORT
+    using F32BlasVariable = Bare::BLAS::Variable<float>;
+
+    py::class_<F32BlasVariable>(m, "F32BlasVariable")
+        .def(py::init<int, int>());
+#endif
 
     return m.ptr();
 }
