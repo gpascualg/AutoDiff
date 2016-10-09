@@ -117,139 +117,138 @@ namespace Bare
 
 
 		template <typename DType>
-		BLAS::Variable<DType>& operator+(BLAS::Variable<DType>& a, BLAS::Variable<DType>& b)
+		std::shared_ptr<BLAS::Variable<DType>> operator+(std::shared_ptr<BLAS::Variable<DType>> a, std::shared_ptr<BLAS::Variable<DType>> b)
 		{
-			auto r = new BLAS::Variable<DType>(a);
+			auto r = std::make_shared<BLAS::Variable<DType>>(a);
 
             // Sum
-			elementwise_add(a.shape(), r->values(), b.values());
+			elementwise_add(a->shape(), r->values(), b->values());
 
             // Adjoint
-			Tape::current()->push([&a, &b, r]() {
-                elementwise_add(a.shape(), a.adjoints(), r->_adjs);
-                elementwise_add(b.shape(), b.adjoints(), r->_adjs);
+			Tape::current()->push([a, b, r]() {
+                elementwise_add(a->shape(), a->adjoints(), r->_adjs);
+                elementwise_add(b->shape(), b->adjoints(), r->_adjs);
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& operator-(BLAS::Variable<DType>& a, BLAS::Variable<DType>& b)
+		std::shared_ptr<BLAS::Variable<DType>> operator-(std::shared_ptr<BLAS::Variable<DType>> a, std::shared_ptr<BLAS::Variable<DType>> b)
 		{
-			auto r = new BLAS::Variable<DType>(a);
+			auto r = std::make_shared<BLAS::Variable<DType>>(a);
 
             // Substract
-            elementwise_sub(a.shape(), r->values(), b.values());
+            elementwise_sub(a->shape(), r->values(), b->values());
 
             // Adjoint
-			Tape::current()->push([&a, &b, r]() {
-                elementwise_add(a.shape(), a.adjoints(), r->_adjs);
-                elementwise_sub(b.shape(), b.adjoints(), r->_adjs);
+			Tape::current()->push([a, b, r]() {
+                elementwise_add(a->shape(), a->adjoints(), r->_adjs);
+                elementwise_sub(b->shape(), b->adjoints(), r->_adjs);
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& operator*(BLAS::Variable<DType>& a, BLAS::Variable<DType>& b)
+		std::shared_ptr<BLAS::Variable<DType>> operator*(std::shared_ptr<BLAS::Variable<DType>> a, std::shared_ptr<BLAS::Variable<DType>> b)
 		{
-			auto r = new BLAS::Variable<DType>(a.shape());
-            elementwise_mul(a.shape(), a.values(), b.values(), r->_values);
+			auto r = std::make_shared<BLAS::Variable<DType>>(a->shape());
+            elementwise_mul(a->shape(), a->values(), b->values(), r->_values);
 
-			Tape::current()->push([&a, &b, r]() {
-				elementwise_mul(a.shape(), b.values(), r->adjoints(), a.adjoints());
-				elementwise_mul(a.shape(), a.values(), r->adjoints(), b.adjoints());
+			Tape::current()->push([a, b, r]() {
+				elementwise_mul(a->shape(), b->values(), r->adjoints(), a->adjoints());
+				elementwise_mul(a->shape(), a->values(), r->adjoints(), b->adjoints());
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& operator/(BLAS::Variable<DType>& a, BLAS::Variable<DType>& b)
+		std::shared_ptr<BLAS::Variable<DType>> operator/(std::shared_ptr<BLAS::Variable<DType>> a, std::shared_ptr<BLAS::Variable<DType>> b)
 		{
-			auto r = new BLAS::Variable<DType>(a.shape());
-            elementwise_div(a.shape(), a.values(), b.values(), r->values());
+			auto r = std::make_shared<BLAS::Variable<DType>>(a.shape());
+            elementwise_div(a->shape(), a->values(), b->values(), r->values());
 
-			Tape::current()->push([&a, &b, r]() {
+			Tape::current()->push([a, b, r]() {
 				// TODO(gpascualg): SIMD parallelization
 				SHAPE_LOOP(a.shape()) {
-					auto bv2 = b.values(x, y) * b.values(x, y);
+					auto bv2 = b->values(x, y) * b->values(x, y);
 
-					a.adjoints(x, y) += b.values(x, y) * r->adjoints(x, y) / bv2;
-					b.adjoints(x, y) -= a.values(x, y) * r->adjoints(x, y) / bv2;
+					a->adjoints(x, y) += b->values(x, y) * r->adjoints(x, y) / bv2;
+					b->adjoints(x, y) -= a->values(x, y) * r->adjoints(x, y) / bv2;
 				}
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& transpose(BLAS::Variable<DType>& a)
+		std::shared_ptr<BLAS::Variable<DType>> transpose(std::shared_ptr<BLAS::Variable<DType>> a)
 		{
-			auto r = new BLAS::Variable<DType>(a.shape().T());
-			cblas_somatcopy(CblasRowMajor, CblasTrans, a.shape().m, a.shape().n, 1.0, a.values(), a.shape().n, r->_values, a.shape().m);
+			auto r = std::make_shared<BLAS::Variable<DType>>(a.shape().T());
+			cblas_somatcopy(CblasRowMajor, CblasTrans, a->shape().m, a->shape().n, 1.0, a->values(), a->shape().n, r->_values, a->shape().m);
 
-			Tape::current()->push([&a, r]() {
-				elementwise_add(a.shape(), a.adjoints(), r->adjoints());
+			Tape::current()->push([a, r]() {
+				elementwise_add(a->shape(), a->adjoints(), r->adjoints());
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& sqrt(BLAS::Variable<DType>& a)
+		std::shared_ptr<BLAS::Variable<DType>> sqrt(std::shared_ptr<BLAS::Variable<DType>> a)
 		{
-			auto r = new BLAS::Variable<DType>(a.shape());
+			auto r = std::make_shared<BLAS::Variable<DType>>(a.shape());
 			// TODO(gpascual): Implement vsSqr
-			elementwise_pow(a.shape(), a.values(), 0.5, r->_values);
+			elementwise_pow(a->shape(), a->values(), 0.5, r->_values);
 
 			DType* rv = r->_values;
 			DType* adjs = r->_adjs;
 
-			Tape::current()->push([r, &a]() {
+			Tape::current()->push([r, a]() {
 				// TODO(gpascual): SIMD implementation
-				SHAPE_LOOP(a.shape()) {
-					a.adjoints(x, y) = r->adjoints(x, y) / (DType(2.0) * r->values(x, y));
+				SHAPE_LOOP(a->shape()) {
+					a->adjoints(x, y) = r->adjoints(x, y) / (DType(2.0) * r->values(x, y));
 				}
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType, typename D>
-		BLAS::Variable<DType>& pow(BLAS::Variable<DType>& a, D expo)
+		std::shared_ptr<BLAS::Variable<DType>> pow(std::shared_ptr<BLAS::Variable<DType>> a, D expo)
 		{
-			auto r = new BLAS::Variable<DType>(a.shape());
-			elementwise_pow(a.shape(), a.values(), (DType)expo, r->_values);
+			auto r = std::make_shared<BLAS::Variable<DType>>(a.shape());
+			elementwise_pow(a->shape(), a->values(), (DType)expo, r->_values);
 
-			Tape::current()->push([&a, r, expo]() {
+			Tape::current()->push([a, r, expo]() {
 				SHAPE_LOOP(a.shape()) {
-					a.adjoints(x, y) += r->adjoints(x, y) * expo * std::pow(a.values(x, y), DType(expo - 1));
+					a->adjoints(x, y) += r->adjoints(x, y) * expo * std::pow(a->values(x, y), DType(expo - 1));
 				}
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& mul(BLAS::Variable<DType>& a, BLAS::Variable<DType>& b)
+		std::shared_ptr<BLAS::Variable<DType>> mul(std::shared_ptr<BLAS::Variable<DType>> a, std::shared_ptr<BLAS::Variable<DType>> b)
 		{
-			auto r = new BLAS::Variable<DType>({a.shape().n, b.shape().m});
-			matmul(a.shape(), a.values(), b.shape(), b.values(), r->_values);
+			auto r = std::make_shared<BLAS::Variable<DType>>(Shape {a.shape().n, b.shape().m});
+			matmul(a->shape(), a->values(), b->shape(), b->values(), r->_values);
 
-			Tape::current()->push([&a, &b, r]{
-				matmul(r->shape(), r->adjoints(), b.shape(), b.values(), a.adjoints(), DType(1.0), DType(1.0), false, true);
-				matmul(a.shape(), a.values(), r->shape(), r->adjoints(), b.adjoints(), DType(1.0), DType(1.0), true, false);
+			Tape::current()->push([a, b, r]{
+				matmul(r->shape(), r->adjoints(), b->shape(), b->values(), a->adjoints(), DType(1.0), DType(1.0), false, true);
+				matmul(a->shape(), a->values(), r->shape(), r->adjoints(), b->adjoints(), DType(1.0), DType(1.0), true, false);
 			});
 
-			return *r;
+			return r;
 		}
 
 		template <typename DType>
-		BLAS::Variable<DType>& slice(BLAS::Variable<DType>& a, int x0, int y0, int dx, int dy)
+		std::shared_ptr<BLAS::Variable<DType>> slice(std::shared_ptr<BLAS::Variable<DType>> a, int x0, int y0, int dx, int dy)
 		{
-			auto r = new BLAS::Variable<DType>(a, x0, y0, dx, dy);
-			return *r;
+			return std::make_shared<BLAS::Variable<DType>>(a, x0, y0, dx, dy);
 		}
 	}
 }
@@ -258,9 +257,9 @@ namespace F32
 {
 	namespace BLAS
 	{
-		inline Bare::BLAS::Variable<float>& Variable(Shape shape, float value)
+		inline std::shared_ptr<Bare::BLAS::Variable<float>> Variable(Shape shape, float value)
 		{
-			return *(new Bare::BLAS::Variable<float>(shape, value));
+			return std::make_shared<Bare::BLAS::Variable<float>>(shape, value);
 		}
 	}
 }
@@ -269,9 +268,9 @@ namespace F64
 {
 	namespace BLAS
 	{
-		inline Bare::BLAS::Variable<double>& Variable(Shape shape, double value)
+		inline std::shared_ptr<Bare::BLAS::Variable<double>> Variable(Shape shape, double value)
 		{
-			return *(new Bare::BLAS::Variable<double>(shape, value));
+			return std::make_shared<Bare::BLAS::Variable<double>>(shape, value);
 		}
 	}
 }

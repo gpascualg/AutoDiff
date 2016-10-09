@@ -2,6 +2,8 @@
 
 #include "config.h"
 
+#include <memory>
+
 struct Shape
 {
 	explicit constexpr Shape() : Shape(0, 0) {}
@@ -40,7 +42,7 @@ namespace Bare
 			Variable(Shape {m, n})
 		{}
 
-		Variable(Shape shape, DType value, DType adj):
+		Variable(Shape shape, DType value, DType adj = 0):
 			Variable(shape)
 		{
 			SHAPE_LOOP(shape) {
@@ -49,22 +51,22 @@ namespace Bare
 			}
 		}
 
-		Variable(Variable& var, DType adj):
-			Variable(var.shape())
+		Variable(std::shared_ptr<Variable> var, DType adj = 0):
+			Variable(var->shape())
 		{
-			SHAPE_LOOP(var.shape()) {
-				values(x, y) = var.values(x, y);
+			SHAPE_LOOP(var->shape()) {
+				values(x, y) = var->values(x, y);
 				adjoints(x, y) = adj;
 			}
 		}
 
 		// Slice/Index operator
-		Variable(Variable& var, int x0, int y0, int dx, int dy):
+		Variable(std::shared_ptr<Variable> var, int x0, int y0, int dx, int dy):
 			_shape({dx, dy})
 		{
-			int start = var.shape()[{x0, y0}];
-			_values = var._values + start;
-			_adjs = var._adjs + start;
+			int start = var->shape()[{x0, y0}];
+			_values = var->_values + start;
+			_adjs = var->_adjs + start;
 			_deleteOnDestructor = false;
 		}
 
@@ -105,28 +107,14 @@ namespace Bare
 
 
 #define VARIABLE_INTERFACE(ns,name) \
-	template <typename T> friend ns::name<T>& operator+(ns::name<T>& a, ns::name<T>& b);\
-	template <typename T> friend ns::name<T>& operator-(ns::name<T>& a, ns::name<T>& b);\
-	template <typename T> friend ns::name<T>& operator*(ns::name<T>& a, ns::name<T>& b);\
-	template <typename T> friend ns::name<T>& operator/(ns::name<T>& a, ns::name<T>& b);\
-	template <typename T> friend ns::name<T>& transpose(ns::name<T>& a);\
-	template <typename T> friend ns::name<T>& sqrt(ns::name<T>& a);\
-	template <typename T, typename D> friend ns::name<T>& pow(ns::name<T>& a, D expo);\
-	template <typename T> friend ns::name<T>& mul(ns::name<T>& a, ns::name<T>& b);\
-	template <typename T> friend ns::name<T>& slice(ns::name<T>& a, int x0, int y0, int dx, int dy);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> operator+(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> operator-(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> operator*(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> operator/(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> transpose(std::shared_ptr<ns::name<T>> a);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> sqrt(std::shared_ptr<ns::name<T>> a);\
+	template <typename T, typename D> friend std::shared_ptr<ns::name<T>> pow(std::shared_ptr<ns::name<T>> a, D expo);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> mul(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> slice(std::shared_ptr<ns::name<T>> a, int x0, int y0, int dx, int dy);\
 public:\
-	explicit name(Shape shape): \
-		Bare::Variable<DType>(shape) \
-	{}\
-	name(int m, int n): \
-		Bare::Variable<DType>(m, n)\
-	{}\
-	name(Shape shape, DType value, DType adj=0): \
-		Bare::Variable<DType>(shape, value, adj)\
-	{}\
-	name(Variable& var, DType adj=0):\
-		Bare::Variable<DType>(var, adj)\
-	{}\
-	name(Variable& var, int x0, int y0, int dx, int dy):\
-		Bare::Variable<DType>(var, x0, y0, dx, dy)\
-	{}
+	using Bare::Variable<DType>::Variable;

@@ -35,54 +35,54 @@ int main()
 	constexpr int dim1 = 5;
 	constexpr int dim2 = 5;
 
-	auto& x = Variable({dim1, dim2}, 1);
-	auto& y = Variable({dim1, dim2}, 2);
-	auto& z = Variable({dim1, dim2}, 2);
+	auto x = Variable({dim1, dim2}, 1);
+	auto y = Variable({dim1, dim2}, 2);
+	auto z = Variable({dim1, dim2}, 2);
 
-	x.values()[3] = 5;
+	x->values()[3] = 5;
 
-	auto& r = x + y + z;
+	auto r = x + y + z;
 
 	auto r2 = slice(r, 2, 2, 2, 2);
 
 	printf("r:\n");
-	matprint(r.shape(), r.values());
+	matprint(r->shape(), r->values());
 
 	//getchar();
 
-	r.flag();
+	r->flag();
 
 	Tape::current()->execute();
 
 	printf("X:\n");
-	matprint(x.shape(), x.adjoints());
+	matprint(x->shape(), x->adjoints());
 
 	printf("Y:\n");
-	matprint(y.shape(), y.adjoints());
+	matprint(y->shape(), y->adjoints());
 
 	printf("Z:\n");
-	matprint(z.shape(), z.adjoints());
+	matprint(z->shape(), z->adjoints());
 
 	// Again!
 	r = x + y + z;
 
 	printf("r:\n");
-	matprint(r.shape(), r.values());
+	matprint(r->shape(), r->values());
 
 	//getchar();
 
-	r.flag();
+	r->flag();
 
 	Tape::current()->execute();
 
 	printf("X:\n");
-	matprint(x.shape(), x.adjoints());
+	matprint(x->shape(), x->adjoints());
 
 	printf("Y:\n");
-	matprint(y.shape(), y.adjoints());
+	matprint(y->shape(), y->adjoints());
 
 	printf("Z:\n");
-	matprint(z.shape(), z.adjoints());
+	matprint(z->shape(), z->adjoints());
 
 	return 0;
 }
