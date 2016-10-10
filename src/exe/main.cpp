@@ -84,5 +84,7 @@ int main()
 	printf("Z:\n");
 	matprint(z->shape(), z->adjoints());
 
+	delete Tape::current();
+
 	return 0;
 }

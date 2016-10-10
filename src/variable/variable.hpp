@@ -18,8 +18,8 @@ struct Shape
 
 	inline constexpr int operator[](Shape&& shape) { return idx(shape.m, shape.n); }
 
-	int m;
-	int n;
+	int const m;
+	int const n;
 };
 
 #define SHAPE_LOOP(shape) for (int y = 0; y < (shape).m; ++y) for (int x = 0; x < (shape).n; ++x)

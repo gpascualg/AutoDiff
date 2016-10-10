@@ -66,7 +66,7 @@ AddDependency(
 if (OPENVML_LIB AND OPENBLAS_LIB)
     BuildNow(
        TARGET AutoDiff-Lib
-       STATIC_LIB
+       SHARED_LIB
        OUTPUT_NAME autodiff
     )
 

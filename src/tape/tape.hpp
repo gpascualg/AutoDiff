@@ -3,6 +3,7 @@
 #include <vector>
 #include <functional>
 
+
 class Tape
 {
 public:
@@ -30,6 +31,7 @@ public:
 	}
 
 	void execute();
+	void clear();
 
 private:
 	std::vector<std::function<void()>> _tape;

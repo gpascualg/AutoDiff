@@ -14,3 +14,11 @@ void Tape::execute()
 		_tape.pop_back();
 	}
 }
+
+void Tape::clear()
+{
+	while (!_tape.empty())
+	{
+		_tape.pop_back();
+	}
+}

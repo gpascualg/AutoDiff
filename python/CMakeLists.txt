@@ -8,9 +8,12 @@ RequireExternal(
     INC_PATH "include"
 )
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/tools/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/tools/")
+
+# Find python and numpy
 set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
 find_package(PythonLibsNew ${PYBIND11_PYTHON_VERSION} REQUIRED)
+#find_package(NumPy REQUIRED)
 
 AddToSources(
    TARGET AutoDiff-Python
@@ -23,6 +26,7 @@ AddToSources(
 set(INCLUDE_DIRS
     ${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/include
     ${PYTHON_INCLUDE_DIRS}
+#    ${PYTHON_NUMPY_INCLUDE_DIR}
 )
 foreach (path ${INCLUDE_DIRS})
     AddToSources(
