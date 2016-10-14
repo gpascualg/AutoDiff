@@ -12,6 +12,9 @@ namespace Bare
 	namespace CPU
 	{
 		template <typename DType>
+		using Constant = Bare::Constant<DType>;
+
+		template <typename DType>
 		class Variable : public Bare::Variable<DType>
 		{
 			VARIABLE_INTERFACE(CPU, Variable)

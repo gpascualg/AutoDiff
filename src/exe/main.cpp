@@ -9,7 +9,7 @@
 
 using namespace F32::BLAS;
 
-#if defined(NDEBUG)
+#if !defined(NDEBUG)
 	#define matprint(shape, var) printf("\t%05.2f\n", var[0]);
 #else
 	template <typename DType>
@@ -32,27 +32,20 @@ int main()
 {
 	Tape::use(nullptr);
 
-	constexpr int dim1 = 5;
-	constexpr int dim2 = 5;
+	constexpr int dim1 = 500;
+	constexpr int dim2 = 200;
 
 	auto x = Variable({dim1, dim2}, 1);
-	auto y = Variable({dim1, dim2}, 2);
+	auto y = Variable({dim2, dim1}, 2);
 	auto z = Variable({dim1, dim2}, 2);
 
 	x->values()[3] = 5;
 
-	auto r = x + y + z;
+	auto r = mul(x, y) / std::make_shared<Bare::Constant<float>>(100.0);
 
-	auto r2 = slice(r, 2, 2, 2, 2);
-
-	printf("r:\n");
 	matprint(r->shape(), r->values());
 
-	//getchar();
-
-	r->flag();
-
-	Tape::current()->execute();
+	Tape::current()->execute({ r });
 
 	printf("X:\n");
 	matprint(x->shape(), x->adjoints());
@@ -63,28 +56,8 @@ int main()
 	printf("Z:\n");
 	matprint(z->shape(), z->adjoints());
 
-	// Again!
-	r = x + y + z;
 
-	printf("r:\n");
-	matprint(r->shape(), r->values());
-
-	//getchar();
-
-	r->flag();
-
-	Tape::current()->execute();
-
-	printf("X:\n");
-	matprint(x->shape(), x->adjoints());
-
-	printf("Y:\n");
-	matprint(y->shape(), y->adjoints());
-
-	printf("Z:\n");
-	matprint(z->shape(), z->adjoints());
-
-	delete Tape::current();
+	//delete Tape::current();
 
 	return 0;
 }

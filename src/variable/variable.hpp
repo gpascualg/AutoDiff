@@ -1,8 +1,11 @@
 #pragma once
 
 #include "config.h"
+#include "tape.hpp" // TODO(gpascualg): Move TapeVariable to aother file
 
 #include <memory>
+#include <type_traits>
+
 
 struct Shape
 {
@@ -25,10 +28,39 @@ struct Shape
 #define SHAPE_LOOP(shape) for (int y = 0; y < (shape).m; ++y) for (int x = 0; x < (shape).n; ++x)
 #define CIDX(shape) shape[{x, y}]
 
+
+namespace Bare
+{
+	template <typename T> class Variable;
+}
+
+template <class T, typename... Args>
+std::shared_ptr<T> make_variable(Args&&... args)
+{
+	auto shared = std::make_shared<T>(std::forward<Args>(args)...);
+	Tape::current()->add(shared);
+	return shared;
+}
+
+
 namespace Bare
 {
 	template <typename DType>
-	class Variable
+	class Constant
+	{
+	public:
+		Constant(DType value):
+			_value(value)
+		{}
+
+		inline const DType value() const { return _value; }
+
+	private:
+		const DType _value;
+	};
+
+	template <typename DType>
+	class Variable : public TapeVariable
 	{
 	public:
 		explicit Variable(Shape shape):
@@ -93,6 +125,14 @@ namespace Bare
 			}
 		}
 
+		void reset(float to) override
+		{
+			SHAPE_LOOP(shape())
+			{
+				adjoints()[shape()[{x, y}]] = DType(to);
+			}
+		}
+
 
         inline Shape& shape() { return _shape; }
 
@@ -111,6 +151,8 @@ namespace Bare
 	template <typename T> friend std::shared_ptr<ns::name<T>> operator-(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
 	template <typename T> friend std::shared_ptr<ns::name<T>> operator*(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
 	template <typename T> friend std::shared_ptr<ns::name<T>> operator/(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> operator/(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
+	template <typename T> friend std::shared_ptr<ns::name<T>> sum(std::shared_ptr<ns::name<T>> a);\
 	template <typename T> friend std::shared_ptr<ns::name<T>> transpose(std::shared_ptr<ns::name<T>> a);\
 	template <typename T> friend std::shared_ptr<ns::name<T>> sqrt(std::shared_ptr<ns::name<T>> a);\
 	template <typename T, typename D> friend std::shared_ptr<ns::name<T>> pow(std::shared_ptr<ns::name<T>> a, D expo);\
