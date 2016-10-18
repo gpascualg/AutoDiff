@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "tape.hpp" // TODO(gpascualg): Move TapeVariable to aother file
+#include "memory_pool.hpp"
 
 #include <memory>
 #include <type_traits>
@@ -66,8 +67,8 @@ namespace Bare
 		explicit Variable(Shape shape):
 			_shape(shape)
 		{
-			_values = new DType[shape.prod()];
-			_adjs = new DType[shape.prod()];
+			_values = (DType*)Pool::get()->allocate<DType>(shape.prod());
+			_adjs = (DType*)Pool::get()->allocate<DType>(shape.prod());
 		}
 
 		Variable(int m, int n):
@@ -77,9 +78,12 @@ namespace Bare
 		Variable(Shape shape, DType value, DType adj = 0):
 			Variable(shape)
 		{
-			SHAPE_LOOP(shape) {
-				values(x, y) = value;
-				adjoints(x, y) = adj;
+			if (value != 0 || adj != 0)
+			{
+				SHAPE_LOOP(shape) {
+					values(x, y) = value;
+					adjoints(x, y) = adj;
+				}
 			}
 		}
 
@@ -106,8 +110,8 @@ namespace Bare
 		{
 			if (_deleteOnDestructor)
 			{
-				delete[] this->_values;
-				delete[] this->_adjs;
+				Pool::get()->deallocate<DType>(this->_values, _shape.prod());
+				Pool::get()->deallocate<DType>(this->_adjs, _shape.prod());
 			}
 		}
 
