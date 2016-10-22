@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <vector>
 #include <functional>
+#include <memory>
 
 #include <variable.hpp>
 #include <cpu.hpp>
@@ -30,7 +31,7 @@ using namespace F32::BLAS;
 
 int main()
 {
-	Tape::use(nullptr);
+	auto tape = std::unique_ptr<Tape>(Tape::use(nullptr));
 
 	constexpr int dim1 = 500;
 	constexpr int dim2 = 200;
@@ -55,9 +56,6 @@ int main()
 
 	printf("Z:\n");
 	matprint(z->shape(), z->adjoints());
-
-
-	//delete Tape::current();
 
 	return 0;
 }

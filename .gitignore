@@ -4,3 +4,4 @@ Debug/
 Release/
 [bB]uild/
 *.pyc
+.ipynb_checkpoints/

@@ -1,14 +1,25 @@
 #include "tape.hpp"
+#include "memory_pool.hpp"
 
 #include <algorithm>
+
 
 Tape* Tape::_last = nullptr;
 std::vector<Tape*> Tape::_tapes{};
 
+Tape::Tape()
+{
+	_pool = new Pool(true, 1);
+}
+
 Tape::~Tape()
 {
+	// Clean up tape first
 	clear();
 	close();
+
+	// Clean up pool
+	delete _pool;
 }
 
 void Tape::add(std::shared_ptr<TapeVariable> var)
@@ -55,6 +66,7 @@ void Tape::clear()
 	}
 
 	_variables.clear();
+	_pool->release();
 }
 
 void Tape::close()

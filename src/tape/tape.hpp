@@ -5,6 +5,8 @@
 #include <memory>
 
 
+class Pool;
+
 class TapeVariable
 {
 public:
@@ -64,6 +66,14 @@ public:
 	void clear();
 	void close();
 
+	inline Pool* pool()
+	{
+		return _pool;
+	}
+
+private:
+	Tape();
+
 private:
 	std::vector<std::function<void()>> _tape;
 	std::vector<std::shared_ptr<TapeVariable>> _variables;
@@ -72,5 +82,6 @@ private:
 	static Tape* _last;
 	static std::vector<Tape*> _tapes;
 
+	Pool* _pool;
 	bool _valid = true;
 };

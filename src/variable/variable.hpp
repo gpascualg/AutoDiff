@@ -67,8 +67,8 @@ namespace Bare
 		explicit Variable(Shape shape):
 			_shape(shape)
 		{
-			_values = (DType*)Pool::get()->allocate<DType>(shape.prod());
-			_adjs = (DType*)Pool::get()->allocate<DType>(shape.prod());
+			_values = (DType*)Tape::current()->pool()->allocate<DType>(shape.prod());
+			_adjs = (DType*)Tape::current()->pool()->allocate<DType>(shape.prod());
 		}
 
 		Variable(int m, int n):
@@ -110,8 +110,8 @@ namespace Bare
 		{
 			if (_deleteOnDestructor)
 			{
-				Pool::get()->deallocate<DType>(this->_values, _shape.prod());
-				Pool::get()->deallocate<DType>(this->_adjs, _shape.prod());
+				Tape::current()->pool()->deallocate<DType>(this->_values, _shape.prod());
+				Tape::current()->pool()->deallocate<DType>(this->_adjs, _shape.prod());
 			}
 		}
 

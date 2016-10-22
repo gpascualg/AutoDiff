@@ -6,7 +6,7 @@
 #include <list>
 #include <mutex>
 #include <thread>
-
+#include <atomic>
 
 
 struct MemoryBlock
@@ -37,29 +37,23 @@ struct OrderAscending
 
 class Pool
 {
+    friend class Tape;
+
 public:
-    static Pool* get()
-    {
-        if (!_instance)
-        {
-            _instance = new Pool(true, 1);
-        }
-
-        return _instance;
-    }
-
     template <typename T>
     void* allocate(uint32_t size);
 
     template <typename T>
     void deallocate(void* memory, uint32_t size);
 
+    void release();
+
 private:
     Pool(bool canGrow, uint32_t maxSize);
 
     static void startZeroInitializer(Pool* pool)
     {
-        while (true)
+        while (!pool->_stop)
         {
             // Wait for work
             std::unique_lock<std::mutex> workLock(pool->_work);
@@ -95,12 +89,12 @@ private:
     void* create(uint32_t size);
 
 private:
-    static Pool* _instance;
     std::thread _thread;
 
     bool _canGrow;
     uint32_t _maxSize;
 
+    std::atomic<bool> _stop;
     std::mutex _work;
     std::condition_variable _workSignal;
 
