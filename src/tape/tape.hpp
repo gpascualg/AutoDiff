@@ -58,6 +58,12 @@ public:
 		_tape.emplace_back(std::move(adj_calc));
 	}
 
+	template <typename T>
+	void prepend(T&& adj_calc)
+	{
+		_tape.emplace(_tape.begin(), std::move(adj_calc));
+	}
+
 	void add(std::shared_ptr<TapeVariable> var);
 
 	void execute();
@@ -69,6 +75,11 @@ public:
 	inline Pool* pool()
 	{
 		return _pool;
+	}
+
+	inline std::vector<std::shared_ptr<TapeVariable>>& variables()
+	{
+		return _variables;
 	}
 
 private:

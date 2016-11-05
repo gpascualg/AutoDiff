@@ -5,6 +5,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DI
 # -[ Find sources
 set(AUTODIFF_FOLDERS
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/optimizer
     ${CMAKE_CURRENT_SOURCE_DIR}/pool
     ${CMAKE_CURRENT_SOURCE_DIR}/tape
     ${CMAKE_CURRENT_SOURCE_DIR}/variable
