@@ -137,13 +137,16 @@ namespace Bare
 			}
 		}
 
+		void setTrainable(bool isTrainable) { _isTrainable = isTrainable; }
 
         inline Shape& shape() { return _shape; }
+		inline bool isTrainable() { return _isTrainable; }
 
 	protected:
 		Shape _shape;
 
 		bool _deleteOnDestructor = true;
+		bool _isTrainable = true;
 		DType* _values = nullptr;
 		DType* _adjs = nullptr;
 	};
