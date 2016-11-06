@@ -15,6 +15,13 @@ namespace py = pybind11;
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 
+class EmptyTape
+{
+public:
+    EmptyTape(){}
+};
+
+
 template <typename DType>
 class PyVariable : public Bare::Variable<DType> {
 public:
@@ -25,6 +32,16 @@ public:
 template <template <class> class Var, typename DType>
 void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* name = "Variable")
 {
+    // 2 Dims tuple
+    m.def("variable", [](std::tuple<int, int> s, DType v, DType a){
+        return make_variable<Var<DType>>(Shape { std::get<0>(s), std::get<1>(s) }, v, a);
+    }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0);
+
+    // ND list
+    m.def("variable", [](std::vector<int> s, DType v, DType a){
+        return make_variable<Var<DType>>(Shape { s[0], s[1] }, v, a);
+    }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0);
+
     py::class_<Bare::Constant<DType>, std::shared_ptr<Bare::Constant<DType>>>(m, "Constant")
         .def(py::init<DType>(), py::arg("value"))
         .def_property_readonly("value", [](Bare::Constant<DType>& constant){
@@ -41,6 +58,7 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
     py::class_<Var<DType>, std::shared_ptr<Var<DType>>>(m, name, baseVariable)
         .def(py::init<Shape, DType, DType>(), py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0)
 
+        /*
         // 2 Dims tuple
         .def("__init__", [](Var<DType>& instance, std::tuple<int, int> s, DType v, DType a){
             new (&instance) Var<DType>(Shape { std::get<0>(s), std::get<1>(s) }, v, a);
@@ -50,6 +68,7 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
         .def("__init__", [](Var<DType>& instance, std::vector<int> s, DType v, DType a){
             new (&instance) Var<DType>(Shape { s[0], s[1] }, v, a);
         }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0)
+        */
 
         .def("__add__", Bare::BLAS::operator+<DType>, py::is_operator())
         .def("__sub__", Bare::BLAS::operator-<DType>, py::is_operator())
@@ -99,7 +118,7 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
         });
 
     tape.def("execute", [] (Tape& tape, std::vector<std::shared_ptr<Var<DType>>> targets) {
-        std::vector<std::shared_ptr<TapeVariable>> other(targets.size());
+        std::vector<std::shared_ptr<TapeVariable>> other;
 
         for (auto v : targets)
         {
@@ -116,24 +135,20 @@ PYBIND11_PLUGIN(autodiff) {
     py::class_<Shape>(m, "Shape")
         .def(py::init<int, int>());
 
+    py::class_<EmptyTape> emptytape(m, "Tape");
+    emptytape
+        .def(py::init<>())
+        .def("__enter__", [](EmptyTape* tape) -> std::unique_ptr<Tape> {
+            return std::unique_ptr<Tape>(Tape::use(nullptr));
+        })
+        .def("__exit__", [](EmptyTape* tape, py::none a, py::none b, py::none c) {
+        })
+        .def("__exit__", [](EmptyTape* tape, py::object a, py::object b, py::object c) {
+        });
 
-    py::class_<Tape> tape(m, "Tape");
+    py::class_<Tape> tape(m, "__Tape");
     tape
-        .def("__init__", [](Tape& tape, Tape* which) {
-            Tape::use(which, &tape);
-        }, py::arg("tape") = (Tape*)nullptr)
-        .def("__enter__", [](const Tape& tape) -> const Tape& {
-            return tape;
-        })
-        .def("__exit__", [](Tape& tape, py::none a, py::none b, py::none c) {
-            tape.clear();
-        })
-        .def("__exit__", [](Tape& tape, py::object a, py::object b, py::object c) {
-            tape.clear();
-        })
-
         .def("execute", (void (Tape::*)())&Tape::execute)
-        //.def("execute", (void (Tape::*)(std::vector<std::shared_ptr<TapeVariable>>))&Tape::execute)
         .def("clear", &Tape::clear)
         .def("close", &Tape::close);
 

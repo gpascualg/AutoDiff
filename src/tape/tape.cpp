@@ -20,6 +20,13 @@ Tape::~Tape()
 
 	// Clean up pool
 	delete _pool;
+	_pool = nullptr;
+
+	// Final closeup
+	if (_last == this)
+	{
+		_last = nullptr;
+	}
 }
 
 void Tape::add(std::shared_ptr<TapeVariable> var)
@@ -41,15 +48,15 @@ void Tape::execute()
 
 void Tape::execute(std::vector<std::shared_ptr<TapeVariable>> targets)
 {
+	for (auto target : targets)
+	{
+		target->reset(1);
+	}
+
 	for (auto var : _variables)
 	{
 		auto target = std::find(targets.begin(), targets.end(), var);
-		if (target != targets.end())
-		{
-			(*target)->reset(1);
-			targets.erase(target);
-		}
-		else
+		if (target == targets.end())
 		{
 			var->reset(0);
 		}

@@ -46,6 +46,9 @@ std::shared_ptr<T> make_variable(Args&&... args)
 
 namespace Bare
 {
+	template <typename T>
+	using SharedVariable = std::shared_ptr<Bare::Variable<T>>;
+
 	template <typename DType>
 	class Constant
 	{
@@ -108,7 +111,7 @@ namespace Bare
 
 		virtual ~Variable()
 		{
-			if (_deleteOnDestructor)
+			if (_deleteOnDestructor && Tape::current())
 			{
 				Tape::current()->pool()->deallocate<DType>(this->_values, _shape.prod());
 				Tape::current()->pool()->deallocate<DType>(this->_adjs, _shape.prod());
@@ -141,6 +144,9 @@ namespace Bare
 
         inline Shape& shape() { return _shape; }
 		inline bool isTrainable() { return _isTrainable; }
+
+	protected:
+
 
 	protected:
 		Shape _shape;

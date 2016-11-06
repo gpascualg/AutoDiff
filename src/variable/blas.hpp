@@ -128,7 +128,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> operator+(std::shared_ptr<Bare::BLAS::Variable<DType>> a, std::shared_ptr<Bare::BLAS::Variable<DType>> b)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a, 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a, 0);
 
 		    // Sum
 			elementwise_add(a->shape(), r->values(), b->values());
@@ -145,7 +145,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> operator-(std::shared_ptr<Bare::BLAS::Variable<DType>> a, std::shared_ptr<Bare::BLAS::Variable<DType>> b)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a, 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a, 0);
 
 		    // Substract
 		    elementwise_sub(a->shape(), r->values(), b->values());
@@ -162,7 +162,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> operator*(std::shared_ptr<Bare::BLAS::Variable<DType>> a, std::shared_ptr<Bare::BLAS::Variable<DType>> b)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a->shape(), 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 		    elementwise_mul(a->shape(), a->values(), b->values(), r->_values);
 
 			Tape::current()->push([a, b, r]() {
@@ -176,7 +176,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> operator/(std::shared_ptr<Bare::BLAS::Variable<DType>> a, std::shared_ptr<Bare::BLAS::Variable<DType>> b)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a->shape(), 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 		    elementwise_div(a->shape(), a->values(), b->values(), r->values());
 
 			Tape::current()->push([a, b, r]() {
@@ -228,7 +228,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> sum(std::shared_ptr<Bare::BLAS::Variable<DType>> a)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(Shape {1, 1}, 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(Shape {1, 1}, 0);
 
 			// TODO(gpascual): SIMD
 			SHAPE_LOOP(a->shape()) {
@@ -247,7 +247,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> transpose(std::shared_ptr<Bare::BLAS::Variable<DType>> a)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a->shape().T());
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape().T());
 			// TODO(gpascualg): Test the implementation below
 			//cblas_transpose(a, r);
 
@@ -265,7 +265,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> sqrt(std::shared_ptr<Bare::BLAS::Variable<DType>> a)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a->shape(), 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 			// TODO(gpascual): Implement vsSqr
 			// TODO(gpascualg): Why does calling this from pyhon crash??
 			//elementwise_pow(a->shape(), a->values(), DType(0.5), r->_values);
@@ -286,7 +286,7 @@ namespace Bare
 		template <typename DType, typename D>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> pow(std::shared_ptr<Bare::BLAS::Variable<DType>> a, D expo)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(a->shape(), 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 			//elementwise_pow(a->shape(), a->values(), DType(expo), r->_values);
 			// TODO(gpascualg): Why does calling this from pyhon crash??
 			SHAPE_LOOP(a->shape()) {
@@ -305,7 +305,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> mul(std::shared_ptr<Bare::BLAS::Variable<DType>> a, std::shared_ptr<Bare::BLAS::Variable<DType>> b)
 		{
-			auto r = make_variable<Bare::BLAS::Variable<DType>>(Shape {a->shape().m, b->shape().n}, 0);
+			auto r = std::make_shared<Bare::BLAS::Variable<DType>>(Shape {a->shape().m, b->shape().n}, 0);
 			matmul(a->shape(), a->values(), b->shape(), b->values(), r->values());
 
 			Tape::current()->push([a, b, r]{
@@ -319,7 +319,7 @@ namespace Bare
 		template <typename DType>
 		std::shared_ptr<Bare::BLAS::Variable<DType>> slice(std::shared_ptr<Bare::BLAS::Variable<DType>> a, int x0, int y0, int dx, int dy)
 		{
-			return make_variable<Bare::BLAS::Variable<DType>>(a, x0, y0, dx, dy);
+			return std::make_shared<Bare::BLAS::Variable<DType>>(a, x0, y0, dx, dy);
 		}
 	}
 }

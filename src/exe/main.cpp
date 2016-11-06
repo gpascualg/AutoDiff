@@ -42,7 +42,7 @@ int main()
 
 	x->values()[3] = 5;
 
-	auto r = mul(x, y) / std::make_shared<Bare::Constant<float>>(100.0);
+	auto r = mul(x + z, y) / std::make_shared<Bare::Constant<float>>(100.0);
 
 	matprint(r->shape(), r->values());
 
