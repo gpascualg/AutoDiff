@@ -78,10 +78,11 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
 
         .def("__add__", operator+<DType>, py::is_operator())
         .def("__sub__", operator-<DType>, py::is_operator())
-        .def("__mul__", operator*<DType>, py::is_operator())
-        .def("__pow__", pow<DType>, py::is_operator())
+        .def("__mul__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Var<DType>> b))&operator*<DType>, py::is_operator())
+        .def("__mul__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Bare::Constant<DType>> b))&operator*<DType>, py::is_operator())
         .def("__div__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Var<DType>> b))&operator/<DType>, py::is_operator())
         .def("__div__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Bare::Constant<DType>> b))&operator/<DType>, py::is_operator())
+        .def("__pow__", pow<DType>, py::is_operator())
 
         .def_property_readonly("T", &transpose<DType>)
 

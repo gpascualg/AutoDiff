@@ -68,6 +68,20 @@ namespace Bare
 				return r;
 			}
 
+			SharedVariable<DType> elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) override
+			{
+				a = _elementwise_mul(a, b);
+
+				Tape::current()->push([a, b]() {
+					// TODO(gpascualg): SIMD parallelization
+					SHAPE_LOOP(a->shape()) {
+						a->adjoints(x, y) *= b->value();
+					}
+				});
+
+				return a;
+			}
+
 			SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) override
 			{
 				auto r = _elementwise_div(a, b);
@@ -186,6 +200,16 @@ namespace Bare
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 			    blas_mul(a->shape(), a->values(), b->values(), r->_values);
 				return r;
+			}
+
+			SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) override
+			{
+				SHAPE_LOOP(a->shape())
+				{
+					a->values(x, y) *= b->value();
+				}
+
+				return a;
 			}
 
 			SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) override

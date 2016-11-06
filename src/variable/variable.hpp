@@ -49,6 +49,7 @@ std::shared_ptr<T> make_variable(Args&&... args)
 	template <typename T> friend std::shared_ptr<Variable<T>> operator+(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
 	template <typename T> friend std::shared_ptr<Variable<T>> operator-(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
 	template <typename T> friend std::shared_ptr<Variable<T>> operator*(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> operator*(std::shared_ptr<Variable<T>> a, std::shared_ptr<Bare::Constant<T>> b); \
 	template <typename T> friend std::shared_ptr<Variable<T>> operator/(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
 	template <typename T> friend std::shared_ptr<Variable<T>> operator/(std::shared_ptr<Variable<T>> a, std::shared_ptr<Bare::Constant<T>> b); \
 	template <typename T> friend std::shared_ptr<Variable<T>> mul(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
@@ -83,6 +84,7 @@ std::shared_ptr<T> make_variable(Args&&... args)
 	DEFINE_FRIEND_2(operator+, add, Variable); \
 	DEFINE_FRIEND_2(operator-, sub, Variable); \
 	DEFINE_FRIEND_2(operator*, elementwise_mul, Variable); \
+	DEFINE_FRIEND_CONST(operator*, elementwise_mul, Variable); \
 	DEFINE_FRIEND_2(operator/, elementwise_div, Variable); \
 	DEFINE_FRIEND_CONST(operator/, elementwise_div, Variable); \
 	DEFINE_FRIEND_2(mul, mul, Variable); \
@@ -199,6 +201,7 @@ namespace Bare
 		virtual SharedVariable<DType> add(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
 		virtual SharedVariable<DType> sub(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
 		virtual SharedVariable<DType> elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
 		virtual SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
 		virtual SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
 		virtual SharedVariable<DType> mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
@@ -212,6 +215,7 @@ namespace Bare
 		virtual SharedVariable<DType> _add(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
 		virtual SharedVariable<DType> _sub(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
 		virtual SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
 		virtual SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
 		virtual SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
 		virtual SharedVariable<DType> _mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
