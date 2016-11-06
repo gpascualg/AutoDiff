@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef WITH_BARE_CPU
+
 #include "variable.hpp"
 #include "tape.hpp"
 
@@ -159,7 +161,7 @@ namespace F32
 	{
 		inline Bare::CPU::Variable<float>& Variable(Shape shape, float value)
 		{
-			return *(new Bare::CPU::Variable<float>(shape, value));
+			return make_variable<Bare::CPU::Variable<float>>(shape, value);
 		}
 	}
 }
@@ -170,7 +172,9 @@ namespace F64
 	{
 		inline Bare::CPU::Variable<double>& Variable(Shape shape, double value)
 		{
-			return *(new Bare::CPU::Variable<double>(shape, value));
+			return make_variable<Bare::CPU::Variable<double>>(shape, value);
 		}
 	}
 }
+
+#endif

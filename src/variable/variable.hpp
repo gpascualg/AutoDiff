@@ -33,6 +33,7 @@ struct Shape
 namespace Bare
 {
 	template <typename T> class Variable;
+	template <typename T> class Constant;
 }
 
 template <class T, typename... Args>
@@ -44,10 +45,57 @@ std::shared_ptr<T> make_variable(Args&&... args)
 }
 
 
+#define ADD_FRIENDS(Variable) \
+	template <typename T> friend std::shared_ptr<Variable<T>> operator+(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> operator-(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> operator*(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> operator/(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> operator/(std::shared_ptr<Variable<T>> a, std::shared_ptr<Bare::Constant<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> mul(std::shared_ptr<Variable<T>> a, std::shared_ptr<Variable<T>> b); \
+	template <typename T> friend std::shared_ptr<Variable<T>> pow(std::shared_ptr<Variable<T>> a, float); \
+	template <typename T> friend std::shared_ptr<Variable<T>> transpose(std::shared_ptr<Variable<T>> a); \
+	template <typename T> friend std::shared_ptr<Variable<T>> sqrt(std::shared_ptr<Variable<T>> a); \
+	template <typename T> friend std::shared_ptr<Variable<T>> sum(std::shared_ptr<Variable<T>> a);
+
+
+#define DEFINE_FRIEND_1(name, member, Variable) \
+	template <typename T> std::shared_ptr<Variable<T>> name(std::shared_ptr<Variable<T>> a) \
+	{ \
+		return std::dynamic_pointer_cast<Variable<T>>(a->member(std::dynamic_pointer_cast<Variable<T>>(a))); \
+	}
+
+
+#define DEFINE_FRIEND_2_(name, member, Variable, BType, BCast) \
+	template <typename T> std::shared_ptr<Variable<T>> name(std::shared_ptr<Variable<T>> a, BType b) \
+	{ \
+		return std::dynamic_pointer_cast<Variable<T>>(a->member(std::dynamic_pointer_cast<Variable<T>>(a), BCast(b))); \
+	}
+
+#define DEFINE_FRIEND_CONST(name, member, Variable) \
+	DEFINE_FRIEND_2_(name, member, Variable, std::shared_ptr<Constant<T>>, )
+
+
+#define DEFINE_FRIEND_2(name, member, Variable) \
+	DEFINE_FRIEND_2_(name, member, Variable, std::shared_ptr<Variable<T>>, std::dynamic_pointer_cast<Variable<T>>)
+
+
+#define DECLARE_FRIENDS(Variable) \
+	DEFINE_FRIEND_2(operator+, add, Variable); \
+	DEFINE_FRIEND_2(operator-, sub, Variable); \
+	DEFINE_FRIEND_2(operator*, elementwise_mul, Variable); \
+	DEFINE_FRIEND_2(operator/, elementwise_div, Variable); \
+	DEFINE_FRIEND_CONST(operator/, elementwise_div, Variable); \
+	DEFINE_FRIEND_2(mul, mul, Variable); \
+	DEFINE_FRIEND_2_(pow, pow, Variable, float, ); \
+	DEFINE_FRIEND_1(transpose, transpose, Variable); \
+	DEFINE_FRIEND_1(sqrt, sqrt, Variable); \
+	DEFINE_FRIEND_1(sum, sum, Variable);
+
+
 namespace Bare
 {
-	template <typename T>
-	using SharedVariable = std::shared_ptr<Bare::Variable<T>>;
+	template <typename T> using SharedVariable = std::shared_ptr<Bare::Variable<T>>;
+	template <typename T> using SharedConstant = std::shared_ptr<Bare::Constant<T>>;
 
 	template <typename DType>
 	class Constant
@@ -145,7 +193,33 @@ namespace Bare
         inline Shape& shape() { return _shape; }
 		inline bool isTrainable() { return _isTrainable; }
 
+
 	protected:
+		// Adjoints calculation
+		virtual SharedVariable<DType> add(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> sub(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
+		virtual SharedVariable<DType> mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+
+		virtual SharedVariable<DType> sum(SharedVariable<DType> a) = 0;
+		virtual SharedVariable<DType> pow(SharedVariable<DType> a, float expo) = 0;
+		virtual SharedVariable<DType> sqrt(SharedVariable<DType> a) = 0;
+		virtual SharedVariable<DType> transpose(SharedVariable<DType> a) = 0;
+
+		// Vanilla operations
+		virtual SharedVariable<DType> _add(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> _sub(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
+		virtual SharedVariable<DType> _mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+
+		virtual SharedVariable<DType> _sum(SharedVariable<DType> a) = 0;
+		virtual SharedVariable<DType> _pow(SharedVariable<DType> a, float expo) = 0;
+		virtual SharedVariable<DType> _sqrt(SharedVariable<DType> a) = 0;
+		virtual SharedVariable<DType> _transpose(SharedVariable<DType> a) = 0;
 
 
 	protected:
@@ -158,18 +232,8 @@ namespace Bare
 	};
 }
 
-
-#define VARIABLE_INTERFACE(ns,name) \
-	template <typename T> friend std::shared_ptr<ns::name<T>> operator+(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> operator-(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> operator*(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> operator/(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> operator/(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> sum(std::shared_ptr<ns::name<T>> a);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> transpose(std::shared_ptr<ns::name<T>> a);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> sqrt(std::shared_ptr<ns::name<T>> a);\
-	template <typename T, typename D> friend std::shared_ptr<ns::name<T>> pow(std::shared_ptr<ns::name<T>> a, D expo);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> mul(std::shared_ptr<ns::name<T>> a, std::shared_ptr<ns::name<T>> b);\
-	template <typename T> friend std::shared_ptr<ns::name<T>> slice(std::shared_ptr<ns::name<T>> a, int x0, int y0, int dx, int dy);\
-public:\
-	using Bare::Variable<DType>::Variable;
+// DEFINE_FRIEND_2(operator+, add, Bare::Variable);
+// DEFINE_FRIEND_2(operator-, sub, Bare::Variable);
+// DEFINE_FRIEND_2(operator*, mul, Bare::Variable);
+// DEFINE_FRIEND_2(operator/, div, Bare::Variable);
+// DEFINE_FRIEND_2(mul, mul, Bare::Variable);

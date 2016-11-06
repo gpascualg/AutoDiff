@@ -14,6 +14,9 @@ namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
+#ifdef WITH_BLAS_SUPPORT
+    using namespace Bare::BLAS;
+#endif
 
 class EmptyTape
 {
@@ -30,17 +33,18 @@ public:
 };
 
 template <template <class> class Var, typename DType>
-void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* name = "Variable")
+void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* name = "_BLAS__Variable")
 {
     // 2 Dims tuple
-    m.def("variable", [](std::tuple<int, int> s, DType v, DType a){
+    m.def("Variable", [](std::tuple<int, int> s, DType v, DType a){
         return make_variable<Var<DType>>(Shape { std::get<0>(s), std::get<1>(s) }, v, a);
     }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0);
 
     // ND list
-    m.def("variable", [](std::vector<int> s, DType v, DType a){
+    m.def("Variable", [](std::vector<int> s, DType v, DType a){
         return make_variable<Var<DType>>(Shape { s[0], s[1] }, v, a);
     }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0);
+
 
     py::class_<Bare::Constant<DType>, std::shared_ptr<Bare::Constant<DType>>>(m, "Constant")
         .def(py::init<DType>(), py::arg("value"))
@@ -48,7 +52,8 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
             return constant.value();
         });
 
-    py::class_<Bare::Variable<DType>, PyVariable<DType>> baseVariable(m, "Variable");
+
+    py::class_<Bare::Variable<DType>, PyVariable<DType>> baseVariable(m, "_BLAS__BaseVariable");
     baseVariable
         .def("flag", &Bare::Variable<DType>::flag)
         .def_property_readonly("shape", [](Bare::Variable<DType>& var){
@@ -56,9 +61,10 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
         });
 
     py::class_<Var<DType>, std::shared_ptr<Var<DType>>>(m, name, baseVariable)
-        .def(py::init<Shape, DType, DType>(), py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0)
 
         /*
+        .def(py::init<Shape, DType, DType>(), py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0)
+
         // 2 Dims tuple
         .def("__init__", [](Var<DType>& instance, std::tuple<int, int> s, DType v, DType a){
             new (&instance) Var<DType>(Shape { std::get<0>(s), std::get<1>(s) }, v, a);
@@ -70,16 +76,14 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
         }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0)
         */
 
-        .def("__add__", Bare::BLAS::operator+<DType>, py::is_operator())
-        .def("__sub__", Bare::BLAS::operator-<DType>, py::is_operator())
-        .def("__mul__", Bare::BLAS::operator*<DType>, py::is_operator())
-        .def("__pow__", Bare::BLAS::pow<DType, DType>, py::is_operator())
-        .def("__div__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Var<DType>> b))&Bare::BLAS::operator/<DType>, py::is_operator())
-        .def("__div__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Bare::Constant<DType>> b))&Bare::BLAS::operator/<DType>, py::is_operator())
+        .def("__add__", operator+<DType>, py::is_operator())
+        .def("__sub__", operator-<DType>, py::is_operator())
+        .def("__mul__", operator*<DType>, py::is_operator())
+        .def("__pow__", pow<DType>, py::is_operator())
+        .def("__div__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Var<DType>> b))&operator/<DType>, py::is_operator())
+        .def("__div__", (std::shared_ptr<Var<DType>> (*)(std::shared_ptr<Var<DType>> a, std::shared_ptr<Bare::Constant<DType>> b))&operator/<DType>, py::is_operator())
 
-        .def_property_readonly("T", [](std::shared_ptr<Var<DType>> instance) {
-            return Bare::BLAS::transpose(instance);
-        })
+        .def_property_readonly("T", &transpose<DType>)
 
         .def_buffer([](Var<DType> &v) {
             return py::buffer_info(
@@ -98,11 +102,11 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
             );
         });
 
-    m.def("tranpose", &Bare::BLAS::transpose<DType>, py::arg("variable"));
-    m.def("mul", &Bare::BLAS::mul<DType>, py::arg("a"), py::arg("b"));
-    m.def("sum", &Bare::BLAS::sum<DType>, py::arg("variable"));
-    m.def("sqrt", &Bare::BLAS::sqrt<DType>, py::arg("variable"));
-    m.def("power", &Bare::BLAS::pow<DType, DType>, py::arg("variable"), py::arg("power"));
+    m.def("tranpose", &transpose<DType>, py::arg("variable"));
+    m.def("mul", &mul<DType>, py::arg("a"), py::arg("b"));
+    m.def("sum", &sum<DType>, py::arg("variable"));
+    m.def("sqrt", &sqrt<DType>, py::arg("variable"));
+    m.def("power", &pow<DType>, py::arg("variable"), py::arg("power"));
     m.def("Adjoints", [](Bare::Variable<DType>& v){
             return py::array {
                 {
@@ -132,9 +136,11 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
 PYBIND11_PLUGIN(autodiff) {
     py::module m("autodiff", "AutoDiff Python bindings");
 
+    // Shape wrapper
     py::class_<Shape>(m, "Shape")
         .def(py::init<int, int>());
 
+    // Tape class to allow "with" syntax
     py::class_<EmptyTape> emptytape(m, "Tape");
     emptytape
         .def(py::init<>())
@@ -146,17 +152,19 @@ PYBIND11_PLUGIN(autodiff) {
         .def("__exit__", [](EmptyTape* tape, py::object a, py::object b, py::object c) {
         });
 
-    py::class_<Tape> tape(m, "__Tape");
+    // Real Tape class, name mangled as it should remain private
+    py::class_<Tape> tape(m, "_AD__Tape");
     tape
         .def("execute", (void (Tape::*)())&Tape::execute)
         .def("clear", &Tape::clear)
         .def("close", &Tape::close);
 
-
-#ifdef WITH_BLAS_SUPPORT
-
+    // Submodules
     py::module f32 = m.def_submodule("f32");
     py::module f64 = m.def_submodule("f64");
+
+
+#ifdef WITH_BLAS_SUPPORT
 
     py::module f32Blas = f32.def_submodule("blas");
     py::module f64Blas = f64.def_submodule("blas");
