@@ -7,6 +7,15 @@
 Tape* Tape::_last = nullptr;
 std::vector<Tape*> Tape::_tapes{};
 
+
+template <typename DType>
+void SpecializedTapeVariable<DType>::update(std::shared_ptr<SpecializedTapeVariable<DType>> var)
+{
+	Tape::current()->pool()->deallocate<DType>(this->_values, this->shape().prod());
+	this->_values = var->_values;
+	var->_values = nullptr;
+}
+
 Tape::Tape()
 {
 	_pool = new Pool(true, 1);
@@ -84,3 +93,8 @@ void Tape::close()
 		_tapes.erase(std::find(_tapes.cbegin(), _tapes.cend(), this));
 	}
 }
+
+
+// SPECIALIZE
+template class SpecializedTapeVariable<float>;
+template class SpecializedTapeVariable<double>;

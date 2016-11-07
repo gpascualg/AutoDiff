@@ -1,5 +1,6 @@
 #include <variable.hpp>
 #include <blas.hpp>
+#include <optimizer.hpp>
 
 #include <algorithm>
 #include <tuple>
@@ -26,6 +27,13 @@ public:
 
 
 template <typename DType>
+class PySpecializedVariable : public SpecializedTapeVariable<DType> {
+public:
+    using SpecializedTapeVariable<DType>::SpecializedTapeVariable;
+};
+
+
+template <typename DType>
 class PyVariable : public Bare::Variable<DType> {
 public:
     using Bare::Variable<DType>::Variable;
@@ -46,18 +54,25 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
     }, py::arg("shape"), py::arg("value"), py::arg("adjoints") = 0);
 
 
-    py::class_<Bare::Constant<DType>, std::shared_ptr<Bare::Constant<DType>>>(m, "Constant")
-        .def(py::init<DType>(), py::arg("value"))
-        .def_property_readonly("value", [](Bare::Constant<DType>& constant){
-            return constant.value();
+    py::class_<SpecializedTapeVariable<DType>, PySpecializedVariable<DType>> specializedVariable(m, "_BLAS__SpecializedVariable");
+    specializedVariable
+        .def_property("trainable",
+            [](Bare::Variable<DType>& var) { return var.isTrainable(); },
+            [](Bare::Variable<DType>& var, bool x) { var.setTrainable(x); })
+        .def_property_readonly("shape", [](Bare::Variable<DType>& var){
+            return std::tuple<int, int> { var.shape().m, var.shape().n };
         });
 
 
-    py::class_<Bare::Variable<DType>, PyVariable<DType>> baseVariable(m, "_BLAS__BaseVariable");
+    py::class_<Bare::Variable<DType>, PyVariable<DType>> baseVariable(m, "_BLAS__BaseVariable", specializedVariable);
     baseVariable
-        .def("flag", &Bare::Variable<DType>::flag)
-        .def_property_readonly("shape", [](Bare::Variable<DType>& var){
-            return std::tuple<int, int> { var.shape().m, var.shape().n };
+        .def("flag", &Bare::Variable<DType>::flag);
+
+
+    py::class_<Bare::Constant<DType>, std::shared_ptr<Bare::Constant<DType>>>(m, "Constant", specializedVariable)
+        .def(py::init<DType>(), py::arg("value"))
+        .def_property_readonly("value", [](Bare::Constant<DType>& constant){
+            return constant.values(0, 0);
         });
 
     py::class_<Var<DType>, std::shared_ptr<Var<DType>>>(m, name, baseVariable)
@@ -134,6 +149,25 @@ void definePythonVariable(py::module& m, py::class_<Tape>& tape, const char* nam
     });
 }
 
+template <typename DType>
+void defineOptimizer(py::module& m, py::class_<Tape>& tape)
+{
+    py::class_<Optimizer<DType>, std::shared_ptr<Optimizer<DType>>> optimizer(m, "Optimizer");
+    optimizer
+        .def(py::init<std::shared_ptr<Bare::Variable<DType>>, DType>(), py::arg("loss"), py::arg("learning_rate"));
+
+    tape.def("execute", [] (Tape& tape, std::vector<std::shared_ptr<Optimizer<DType>>> targets) {
+        std::vector<std::shared_ptr<TapeVariable>> other;
+
+        for (auto v : targets)
+        {
+            other.emplace_back(std::dynamic_pointer_cast<TapeVariable>(v));
+        }
+
+        tape.execute(other);
+    });
+}
+
 PYBIND11_PLUGIN(autodiff) {
     py::module m("autodiff", "AutoDiff Python bindings");
 
@@ -174,6 +208,10 @@ PYBIND11_PLUGIN(autodiff) {
     definePythonVariable<Bare::BLAS::Variable, double>(f64Blas, tape);
 
 #endif
+
+    // Add all optimizers
+    defineOptimizer<float>(f32, tape);
+    defineOptimizer<double>(f64, tape);
 
     return m.ptr();
 }

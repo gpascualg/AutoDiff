@@ -8,28 +8,6 @@
 #include <type_traits>
 
 
-struct Shape
-{
-	explicit constexpr Shape() : Shape(0, 0) {}
-
-	constexpr Shape(int m, int n):
-		m(m), n(n)
-	{}
-
-	inline constexpr int prod() const { return m*n; }
-	inline constexpr Shape T() const { return { n, m }; }
-	inline constexpr int idx(int x, int y) const { return y * n + x; }
-
-	inline constexpr int operator[](Shape&& shape) { return idx(shape.m, shape.n); }
-
-	int const m;
-	int const n;
-};
-
-#define SHAPE_LOOP(shape) for (int y = 0; y < (shape).m; ++y) for (int x = 0; x < (shape).n; ++x)
-#define CIDX(shape) shape[{x, y}]
-
-
 namespace Bare
 {
 	template <typename T> class Variable;
@@ -96,32 +74,43 @@ std::shared_ptr<T> make_variable(Args&&... args)
 
 namespace Bare
 {
+	template <typename T> using SharedTapeVariable = std::shared_ptr<SpecializedTapeVariable<T>>;
 	template <typename T> using SharedVariable = std::shared_ptr<Bare::Variable<T>>;
 	template <typename T> using SharedConstant = std::shared_ptr<Bare::Constant<T>>;
 
 	template <typename DType>
-	class Constant
+	class Constant: public SpecializedTapeVariable<DType>
 	{
 	public:
-		Constant(DType value):
-			_value(value)
+		Constant(const Shape& shape):
+			SpecializedTapeVariable<DType>(shape)
 		{}
 
-		inline const DType value() const { return _value; }
+		Constant(Shape shape, DType* values) :
+			SpecializedTapeVariable<DType>(shape)
+		{
+			this->_values = values;
+		}
 
-	private:
-		const DType _value;
+		Constant(DType value):
+			SpecializedTapeVariable<DType>(Shape {1, 1})
+		{
+			this->_values = new DType;
+			*this->_values = value;
+		}
 	};
 
 	template <typename DType>
-	class Variable : public TapeVariable
+	class Variable : public SpecializedTapeVariable<DType>
 	{
+		template <typename T> friend class Optimizer;
+
 	public:
 		explicit Variable(Shape shape):
-			_shape(shape)
+			SpecializedTapeVariable<DType>(shape)
 		{
-			_values = (DType*)Tape::current()->pool()->allocate<DType>(shape.prod());
-			_adjs = (DType*)Tape::current()->pool()->allocate<DType>(shape.prod());
+			this->_values = (DType*)Tape::current()->pool()->allocate<DType>(shape.prod());
+			this->_adjs = (DType*)Tape::current()->pool()->allocate<DType>(shape.prod());
 		}
 
 		Variable(int m, int n):
@@ -134,28 +123,47 @@ namespace Bare
 			if (value != 0 || adj != 0)
 			{
 				SHAPE_LOOP(shape) {
-					values(x, y) = value;
-					adjoints(x, y) = adj;
+					this->values(x, y) = value;
+					this->adjoints(x, y) = adj;
 				}
 			}
+		}
+
+		Variable(std::shared_ptr<SpecializedTapeVariable<DType>> var, DType adj = 0):
+			Variable(var->shape())
+		{
+			SHAPE_LOOP(var->shape()) {
+				this->values(x, y) = var->values(x, y);
+				this->adjoints(x, y) = adj;
+			}
+		}
+
+		// Slice/Index operator
+		Variable(std::shared_ptr<SpecializedTapeVariable<DType>> var, int x0, int y0, int dx, int dy):
+			SpecializedTapeVariable<DType>(Shape{dx, dy})
+		{
+			int start = var->shape()[{x0, y0}];
+			this->_values = var->_values + start;
+			this->_adjs = var->_adjs + start;
+			_deleteOnDestructor = false;
 		}
 
 		Variable(std::shared_ptr<Variable> var, DType adj = 0):
 			Variable(var->shape())
 		{
 			SHAPE_LOOP(var->shape()) {
-				values(x, y) = var->values(x, y);
-				adjoints(x, y) = adj;
+				this->values(x, y) = var->values(x, y);
+				this->adjoints(x, y) = adj;
 			}
 		}
 
 		// Slice/Index operator
 		Variable(std::shared_ptr<Variable> var, int x0, int y0, int dx, int dy):
-			_shape({dx, dy})
+			SpecializedTapeVariable<DType>(Shape{dx, dy})
 		{
 			int start = var->shape()[{x0, y0}];
-			_values = var->_values + start;
-			_adjs = var->_adjs + start;
+			this->_values = var->_values + start;
+			this->_adjs = var->_adjs + start;
 			_deleteOnDestructor = false;
 		}
 
@@ -163,37 +171,33 @@ namespace Bare
 		{
 			if (_deleteOnDestructor && Tape::current())
 			{
-				Tape::current()->pool()->deallocate<DType>(this->_values, _shape.prod());
-				Tape::current()->pool()->deallocate<DType>(this->_adjs, _shape.prod());
+				if (this->_values)
+				{
+					Tape::current()->pool()->deallocate<DType>(this->_values, this->shape().prod());
+				}
+
+				if (this->_adjs)
+				{
+					Tape::current()->pool()->deallocate<DType>(this->_adjs, this->shape().prod());
+				}
 			}
 		}
 
-		inline DType* values() { return _values; }
-		inline DType& values(int x, int y) { return _values[_shape[{x, y}]]; }
-
-		inline DType* adjoints() { return _adjs; }
-		inline DType& adjoints(int x, int y) { return _adjs[_shape[{x, y}]]; }
-
 		virtual inline void flag()
 		{
-			SHAPE_LOOP(shape())
+			SELF_SHAPE_LOOP()
 			{
-				adjoints()[shape()[{x, y}]] = 1;
+				this->adjoints(x, y) = 1;
 			}
 		}
 
 		void reset(float to) override
 		{
-			SHAPE_LOOP(shape())
+			SELF_SHAPE_LOOP()
 			{
-				adjoints()[shape()[{x, y}]] = DType(to);
+				this->adjoints(x, y) = DType(to);
 			}
 		}
-
-		void setTrainable(bool isTrainable) { _isTrainable = isTrainable; }
-
-        inline Shape& shape() { return _shape; }
-		inline bool isTrainable() { return _isTrainable; }
 
 
 	protected:
@@ -212,32 +216,19 @@ namespace Bare
 		virtual SharedVariable<DType> transpose(SharedVariable<DType> a) = 0;
 
 		// Vanilla operations
-		virtual SharedVariable<DType> _add(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
-		virtual SharedVariable<DType> _sub(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
-		virtual SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
-		virtual SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
-		virtual SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
-		virtual SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) = 0;
-		virtual SharedVariable<DType> _mul(SharedVariable<DType> a, SharedVariable<DType> b) = 0;
+		virtual SharedTapeVariable<DType> _add(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) = 0;
+		virtual SharedTapeVariable<DType> _sub(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) = 0;
+		virtual SharedTapeVariable<DType> _elementwise_mul(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) = 0;
+		virtual SharedTapeVariable<DType> _elementwise_div(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) = 0;
+		virtual SharedTapeVariable<DType> _mul(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) = 0;
 
-		virtual SharedVariable<DType> _sum(SharedVariable<DType> a) = 0;
-		virtual SharedVariable<DType> _pow(SharedVariable<DType> a, float expo) = 0;
-		virtual SharedVariable<DType> _sqrt(SharedVariable<DType> a) = 0;
-		virtual SharedVariable<DType> _transpose(SharedVariable<DType> a) = 0;
+		virtual SharedTapeVariable<DType> _sum(SharedTapeVariable<DType> a) = 0;
+		virtual SharedTapeVariable<DType> _pow(SharedTapeVariable<DType> a, float expo) = 0;
+		virtual SharedTapeVariable<DType> _sqrt(SharedTapeVariable<DType> a) = 0;
+		virtual SharedTapeVariable<DType> _transpose(SharedTapeVariable<DType> a) = 0;
 
 
 	protected:
-		Shape _shape;
-
 		bool _deleteOnDestructor = true;
-		bool _isTrainable = true;
-		DType* _values = nullptr;
-		DType* _adjs = nullptr;
 	};
 }
-
-// DEFINE_FRIEND_2(operator+, add, Bare::Variable);
-// DEFINE_FRIEND_2(operator-, sub, Bare::Variable);
-// DEFINE_FRIEND_2(operator*, mul, Bare::Variable);
-// DEFINE_FRIEND_2(operator/, div, Bare::Variable);
-// DEFINE_FRIEND_2(mul, mul, Bare::Variable);

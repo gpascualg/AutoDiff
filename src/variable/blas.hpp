@@ -25,11 +25,25 @@ namespace Bare
 		template <typename DType>
 		class Variable : public Bare::Variable<DType>
 		{
+			template <typename T> friend class Optimizer;
+
 			using Bare::Variable<DType>::Variable;
 
 			ADD_FRIENDS(Bare::BLAS::Variable)
 
 		protected:
+			template <typename T>
+			inline std::shared_ptr<Bare::BLAS::Variable<DType>> cast(std::shared_ptr<T> p)
+			{
+				return std::dynamic_pointer_cast<Bare::BLAS::Variable<DType>>(p);
+			}
+
+			template <typename T>
+			inline std::shared_ptr<SpecializedTapeVariable<DType>> downcast(std::shared_ptr<T> p)
+			{
+				return std::dynamic_pointer_cast<SpecializedTapeVariable<DType>>(p);
+			}
+
 			SharedVariable<DType> add(SharedVariable<DType> a, SharedVariable<DType> b) override
 			{
 				auto r = _add(a, b);
@@ -40,7 +54,7 @@ namespace Bare
 			        blas_add(b->shape(), b->adjoints(), r->adjoints());
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> sub(SharedVariable<DType> a, SharedVariable<DType> b) override
@@ -53,7 +67,7 @@ namespace Bare
 			        blas_sub(b->shape(), b->adjoints(), r->adjoints());
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) override
@@ -65,21 +79,21 @@ namespace Bare
 					blas_mul(a->shape(), a->values(), r->adjoints(), b->adjoints());
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) override
 			{
-				a = _elementwise_mul(a, b);
+				auto r = _elementwise_mul(a, b);
 
-				Tape::current()->push([a, b]() {
+				Tape::current()->push([r, b]() {
 					// TODO(gpascualg): SIMD parallelization
-					SHAPE_LOOP(a->shape()) {
-						a->adjoints(x, y) *= b->value();
+					SHAPE_LOOP(r->shape()) {
+						r->adjoints(x, y) *= b->values(0, 0);
 					}
 				});
 
-				return a;
+				return cast(r);
 			}
 
 			SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) override
@@ -96,21 +110,21 @@ namespace Bare
 					}
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) override
 			{
-				a = _elementwise_div(a, b);
+				auto r = _elementwise_div(a, b);
 
-				Tape::current()->push([a, b]() {
+				Tape::current()->push([r, b]() {
 					// TODO(gpascualg): SIMD parallelization
-					SHAPE_LOOP(a->shape()) {
-						a->adjoints(x, y) /= b->value();
+					SHAPE_LOOP(r->shape()) {
+						r->adjoints(x, y) /= b->values(0, 0);
 					}
 				});
 
-				return a;
+				return cast(r);
 			}
 
 			SharedVariable<DType> sum(SharedVariable<DType> a) override
@@ -123,7 +137,7 @@ namespace Bare
 					}
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> sqrt(SharedVariable<DType> a) override
@@ -137,7 +151,7 @@ namespace Bare
 					}
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> pow(SharedVariable<DType> a, float expo) override
@@ -150,7 +164,7 @@ namespace Bare
 					}
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> mul(SharedVariable<DType> a, SharedVariable<DType> b) override
@@ -162,7 +176,7 @@ namespace Bare
 					blas_matmul(a->shape(), a->values(), r->shape(), r->adjoints(), b->adjoints(), DType(1.0), DType(1.0), true, false);
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> transpose(SharedVariable<DType> a) override
@@ -173,7 +187,7 @@ namespace Bare
 					blas_add(a->shape(), a->adjoints(), r->adjoints());
 				});
 
-				return r;
+				return cast(r);
 			}
 
 			SharedVariable<DType> slice(SharedVariable<DType> a, int x0, int y0, int dx, int dy)
@@ -181,55 +195,81 @@ namespace Bare
 				return std::make_shared<Bare::BLAS::Variable<DType>>(a, x0, y0, dx, dy);
 			}
 
-			SharedVariable<DType> _add(SharedVariable<DType> a, SharedVariable<DType> b) override
+
+			// VANILLA METHODS
+
+			SharedTapeVariable<DType> _add(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a, 0);
 				blas_add(a->shape(), r->values(), b->values());
 				return r;
 			}
 
-			SharedVariable<DType> _sub(SharedVariable<DType> a, SharedVariable<DType> b) override
+			SharedTapeVariable<DType> _sub(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a, 0);
 				blas_sub(a->shape(), r->values(), b->values());
 				return r;
 			}
 
-			SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedVariable<DType> b) override
+			SharedTapeVariable<DType> _elementwise_mul(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
 			{
-				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
-			    blas_mul(a->shape(), a->values(), b->values(), r->_values);
-				return r;
-			}
-
-			SharedVariable<DType> _elementwise_mul(SharedVariable<DType> a, SharedConstant<DType> b) override
-			{
-				SHAPE_LOOP(a->shape())
+				if (a->shape().isUnitary())
 				{
-					a->values(x, y) *= b->value();
+					if (!b->shape().isUnitary())
+					{
+						// TODO(gpascualg): ERROR
+					}
+
+					a->values(0, 0) *= b->values(0, 0);
 				}
-
-				return a;
-			}
-
-			SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedVariable<DType> b) override
-			{
-				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
-			    blas_div(a->shape(), a->values(), b->values(), r->values());
-				return r;
-			}
-
-			SharedVariable<DType> _elementwise_div(SharedVariable<DType> a, SharedConstant<DType> b) override
-			{
-				SHAPE_LOOP(a->shape())
+				else if (b->shape().isUnitary())
 				{
-					a->values(x, y) /= b->value();
-				}
+					SHAPE_LOOP(a->shape())
+					{
+						a->values(x, y) *= b->values(0, 0);
+					}
 
-				return a;
+					return a;
+				}
+				else
+				{
+					auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
+				    blas_mul(a->shape(), a->values(), b->values(), r->values());
+					return r;
+				}
 			}
 
-			SharedVariable<DType> _sum(SharedVariable<DType> a) override
+			SharedTapeVariable<DType> _elementwise_div(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
+			{
+				if (a->shape().isUnitary())
+				{
+					if (!b->shape().isUnitary())
+					{
+						// TODO(gpascualg): ERROR
+					}
+
+					a->values(0, 0) /= b->values(0, 0);
+					return a;
+				}
+				else if (b->shape().isUnitary())
+				{
+					SHAPE_LOOP(a->shape())
+					{
+						a->values(x, y) /= b->values(0, 0);
+					}
+
+					return a;
+				}
+				else
+				{
+					auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
+				    blas_div(a->shape(), a->values(), b->values(), r->values());
+					return r;
+				}
+			}
+
+			SharedTapeVariable<DType> _sum(SharedTapeVariable<DType> a) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(Shape {1, 1}, 0);
 
@@ -241,7 +281,7 @@ namespace Bare
 				return r;
 			}
 
-			SharedVariable<DType> _sqrt(SharedVariable<DType> a) override
+			SharedTapeVariable<DType> _sqrt(SharedTapeVariable<DType> a) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 				// TODO(gpascual): Implement vsSqr
@@ -254,7 +294,7 @@ namespace Bare
 				return r;
 			}
 
-			SharedVariable<DType> _pow(SharedVariable<DType> a, float expo) override
+			SharedTapeVariable<DType> _pow(SharedTapeVariable<DType> a, float expo) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape(), 0);
 				//elementwise_pow(a->shape(), a->values(), DType(expo), r->_values);
@@ -266,14 +306,14 @@ namespace Bare
 				return r;
 			}
 
-			SharedVariable<DType> _mul(SharedVariable<DType> a, SharedVariable<DType> b) override
+			SharedTapeVariable<DType> _mul(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(Shape {a->shape().m, b->shape().n}, 0);
 				blas_matmul(a->shape(), a->values(), b->shape(), b->values(), r->values());
 				return r;
 			}
 
-			SharedVariable<DType> _transpose(SharedVariable<DType> a) override
+			SharedTapeVariable<DType> _transpose(SharedTapeVariable<DType> a) override
 			{
 				auto r = std::make_shared<Bare::BLAS::Variable<DType>>(a->shape().T());
 				// TODO(gpascualg): parallelization
