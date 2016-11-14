@@ -1,7 +1,7 @@
 #include "memory_pool.hpp"
 
 #include <cstring>
-
+#include <stdlib.h> // malloc
 
 Pool::Pool(bool canGrow, uint32_t maxSize):
     _canGrow(canGrow),

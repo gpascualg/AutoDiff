@@ -20,74 +20,78 @@ endforeach()
 
 
 # -[ Add dependencies
-set(OpenVML_PATCHES
-    "git apply --whitespace=fix ${CMAKE_SOURCE_DIR}/patches/real_mul_div.patch"
-    "git apply --whitespace=fix ${CMAKE_SOURCE_DIR}/patches/real_powx_acc.patch"
-)
-RequireExternal(
-    TARGET AutoDiff-Lib
-    EXCLUDE
-    MODULE xianyi/OpenVML:master
-    CONFIGURE_STEPS ${OpenVML_PATCHES}
-    INC_PATH "include"
-)
-RequireExternal(
-    TARGET AutoDiff-Lib
-    EXCLUDE
-    MODULE xianyi/OpenBLAS:master
-    INC_PATH "/"
-)
+if (WITH_BLAS_SUPPORT)
+    set(OpenVML_PATCHES
+        "git apply --whitespace=fix ${CMAKE_SOURCE_DIR}/patches/real_mul_div.patch"
+        "git apply --whitespace=fix ${CMAKE_SOURCE_DIR}/patches/real_powx_acc.patch"
+    )
+    RequireExternal(
+        TARGET AutoDiff-Lib
+        EXCLUDE
+        MODULE xianyi/OpenVML:master
+        CONFIGURE_STEPS ${OpenVML_PATCHES}
+        INC_PATH "include"
+    )
+    RequireExternal(
+        TARGET AutoDiff-Lib
+        EXCLUDE
+        MODULE xianyi/OpenBLAS:master
+        INC_PATH "/"
+    )
 
 
-# -[ Find both libraries
-find_library(OPENBLAS_LIB
-    NAMES openblas libopenblas
-    HINTS ${CMAKE_BINARY_DIR}/third_party/src/xianyi_OpenBLAS-build/lib
-    NO_DEFAULT_PATH
-)
-find_library(OPENVML_LIB
-    NAMES openvml
-    HINTS ${CMAKE_BINARY_DIR}/third_party/src/xianyi_OpenVML-build/lib
-    PATH_SUFFIXES Debug Release
-    NO_DEFAULT_PATH
-)
+    # -[ Find both libraries
+    find_library(OPENBLAS_LIB
+        NAMES openblas libopenblas
+        HINTS ${CMAKE_BINARY_DIR}/third_party/src/xianyi_OpenBLAS-build/lib
+        NO_DEFAULT_PATH
+    )
+    find_library(OPENVML_LIB
+        NAMES openvml
+        HINTS ${CMAKE_BINARY_DIR}/third_party/src/xianyi_OpenVML-build/lib
+        PATH_SUFFIXES Debug Release
+        NO_DEFAULT_PATH
+    )
 
 
-# -[ Add dependencies
-AddDependency(
-    TARGET AutoDiff-Lib
-    DEPENDENCY ${OPENBLAS_LIB}
-)
-AddDependency(
-    TARGET AutoDiff-Lib
-    DEPENDENCY ${OPENVML_LIB}
-)
+    # -[ Add dependencies
+    AddDependency(
+        TARGET AutoDiff-Lib
+        DEPENDENCY ${OPENBLAS_LIB}
+    )
+    AddDependency(
+        TARGET AutoDiff-Lib
+        DEPENDENCY ${OPENVML_LIB}
+    )
+endif()
 
 
 # -[ Build project
-if (OPENVML_LIB AND OPENBLAS_LIB)
+if ((WITH_BLAS_SUPPORT AND OPENVML_LIB AND OPENBLAS_LIB) OR NOT WITH_BLAS_SUPPORT)
     BuildNow(
        TARGET AutoDiff-Lib
        SHARED_LIB
        OUTPUT_NAME autodiff
     )
 
-    AddToSources(
-       TARGET AutoDiff-Exe
-       SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/exe
-       GLOB_SEARCH ".hpp;.cpp"
-    )
+    if (NOT BUILD_EMSCRIPTEN)
+        AddToSources(
+           TARGET AutoDiff-Exe
+           SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/exe
+           GLOB_SEARCH ".hpp;.cpp"
+        )
 
-    AddDependency(
-        TARGET AutoDiff-Exe
-        DEPENDENCY AutoDiff-Lib
-    )
+        AddDependency(
+            TARGET AutoDiff-Exe
+            DEPENDENCY AutoDiff-Lib
+        )
 
-    BuildNow(
-       TARGET AutoDiff-Exe
-       EXECUTABLE
-       OUTPUT_NAME autodiff
-    )
+        BuildNow(
+           TARGET AutoDiff-Exe
+           EXECUTABLE
+           OUTPUT_NAME autodiff
+        )
+    endif()
 
     if (WITH_BLAS_SUPPORT AND WIN32)
         get_filename_component(OPENBLAS_PATH ${OPENBLAS_LIB} DIRECTORY)

@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 #include <memory>
-
+#include <stdlib.h> // malloc
 
 class Pool;
 class Tape;
