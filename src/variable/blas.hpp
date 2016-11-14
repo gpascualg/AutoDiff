@@ -25,7 +25,7 @@ namespace Bare
 		template <typename DType>
 		class Variable : public Bare::Variable<DType>
 		{
-			template <typename T> friend class Optimizer;
+			template <typename T> friend class ::Optimizer;
 
 			using Bare::Variable<DType>::Variable;
 

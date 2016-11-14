@@ -72,6 +72,10 @@ std::shared_ptr<T> make_variable(Args&&... args)
 	DEFINE_FRIEND_1(sum, sum, Variable);
 
 
+// Clang
+template <typename T> class Optimizer;
+
+
 namespace Bare
 {
 	template <typename T> using SharedTapeVariable = std::shared_ptr<SpecializedTapeVariable<T>>;
@@ -103,7 +107,7 @@ namespace Bare
 	template <typename DType>
 	class Variable : public SpecializedTapeVariable<DType>
 	{
-		template <typename T> friend class Optimizer;
+		template <typename T> friend class ::Optimizer;
 
 	public:
 		explicit Variable(Shape shape):
