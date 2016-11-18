@@ -1,4 +1,5 @@
 project(AutoDiff-Python)
+CreateTarget(TARGET AutoDiff-Python)
 
 RequireExternal(
     TARGET AutoDiff-Python
@@ -8,7 +9,9 @@ RequireExternal(
     INC_PATH "include"
 )
 
-if (EXISTS "${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/tools/")
+ResolveExternal(TARGET AutoDiff-Python)
+
+if (AutoDiff-Python_IS_RESOLVED)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/tools/")
 
     # Find python and numpy
@@ -41,7 +44,6 @@ if (EXISTS "${CMAKE_BINARY_DIR}/third_party/src/pybind_pybind11/tools/")
         TARGET AutoDiff-Python
         DEPENDENCY AutoDiff-Lib
     )
-
 
     BuildNow(
        TARGET AutoDiff-Python

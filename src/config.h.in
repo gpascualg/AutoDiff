@@ -1,1 +1,2 @@
 #cmakedefine WITH_BLAS_SUPPORT
+#cmakedefine SKIP_BARE_CPU

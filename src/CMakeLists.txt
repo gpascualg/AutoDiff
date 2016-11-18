@@ -1,3 +1,7 @@
+# -[ Create target
+project(AutoDiff-Lib)
+CreateTarget(TARGET AutoDiff-Lib)
+
 # -[ Build config file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
@@ -27,19 +31,25 @@ if (WITH_BLAS_SUPPORT)
     )
     RequireExternal(
         TARGET AutoDiff-Lib
-        EXCLUDE
         MODULE xianyi/OpenVML:master
+        EXCLUDE
+        SKIP_LINK
         CONFIGURE_STEPS ${OpenVML_PATCHES}
         INC_PATH "include"
     )
     RequireExternal(
         TARGET AutoDiff-Lib
-        EXCLUDE
         MODULE xianyi/OpenBLAS:master
+        EXCLUDE
+        SKIP_LINK
         INC_PATH "/"
     )
+endif()
 
+ResolveExternal(TARGET AutoDiff-Lib)
 
+# -[ Build project
+if (AutoDiff-Lib_IS_RESOLVED)
     # -[ Find both libraries
     find_library(OPENBLAS_LIB
         NAMES openblas libopenblas
@@ -53,7 +63,6 @@ if (WITH_BLAS_SUPPORT)
         NO_DEFAULT_PATH
     )
 
-
     # -[ Add dependencies
     AddDependency(
         TARGET AutoDiff-Lib
@@ -63,14 +72,15 @@ if (WITH_BLAS_SUPPORT)
         TARGET AutoDiff-Lib
         DEPENDENCY ${OPENVML_LIB}
     )
-endif()
 
+    set(LIB_BUILD_TYPE "SHARED_LIB")
+    if (BUILD_STATIC_LIB)
+        set(LIB_BUILD_TYPE "STATIC_LIB")
+    endif()
 
-# -[ Build project
-if ((WITH_BLAS_SUPPORT AND OPENVML_LIB AND OPENBLAS_LIB) OR NOT WITH_BLAS_SUPPORT)
     BuildNow(
        TARGET AutoDiff-Lib
-       SHARED_LIB
+       ${LIB_BUILD_TYPE}
        OUTPUT_NAME autodiff
     )
 
@@ -104,13 +114,4 @@ if ((WITH_BLAS_SUPPORT AND OPENVML_LIB AND OPENBLAS_LIB) OR NOT WITH_BLAS_SUPPOR
             COMMENT "Copying OpenBLAS & OpenVML DLLs"
         )
     endif()
-else()
-    message("A first build will be done with dependencies only")
-    add_custom_target(BuildDeps ALL DEPENDS xianyi_OpenVML xianyi_OpenBLAS)
-    add_custom_target(Rebuild ALL
-        ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
-        COMMAND ${CMAKE_COMMAND} --build .
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        DEPENDS BuildDeps
-    )
 endif()
