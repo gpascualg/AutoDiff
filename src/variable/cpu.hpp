@@ -5,6 +5,7 @@
 #ifndef SKIP_BARE_CPU
 
 #include "tape.hpp"
+#include "ops/cpu.hpp"
 
 #include <functional>
 #include <vector>
@@ -21,10 +22,7 @@ namespace Bare
 		class Variable : public Bare::Variable<DType>
 		{
 			template <typename T> friend class ::Optimizer;
-
 			using Bare::Variable<DType>::Variable;
-
-			ADD_FRIENDS(Bare::CPU::Variable)
 
 		protected:
 			template <typename T>
@@ -39,6 +37,10 @@ namespace Bare
 				return std::dynamic_pointer_cast<SpecializedTapeVariable<DType>>(p);
 			}
 
+			template <typename T>
+			friend std::shared_ptr<Bare::CPU::Variable<T>> operator+(std::shared_ptr<Bare::CPU::Variable<T>> a, std::shared_ptr<Bare::CPU::Variable<T>> b);
+
+			/*
 			SharedVariable<DType> add(SharedVariable<DType> a, SharedVariable<DType> b) override
 			{
 				auto r = _add(a, b);
@@ -213,155 +215,15 @@ namespace Bare
 			{
 				return std::make_shared<Bare::CPU::Variable<DType>>(a, x0, y0, dx, dy);
 			}
-
-
-			// VANILLA METHODS
-
-			SharedTapeVariable<DType> _add(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape());
-				SHAPE_LOOP(a->shape())
-				{
-					r->values(x, y) = a->values(x, y) + b->values(x, y);
-				}
-				return r;
-			}
-
-			SharedTapeVariable<DType> _sub(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape());
-				SHAPE_LOOP(a->shape())
-				{
-					r->values(x, y) = a->values(x, y) - b->values(x, y);
-				}
-				return r;
-			}
-
-			SharedTapeVariable<DType> _elementwise_mul(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
-			{
-				if (a->shape().isUnitary())
-				{
-					if (!b->shape().isUnitary())
-					{
-						// TODO(gpascualg): ERROR
-					}
-
-					a->values(0, 0) *= b->values(0, 0);
-				}
-				else if (b->shape().isUnitary())
-				{
-					SHAPE_LOOP(a->shape())
-					{
-						a->values(x, y) *= b->values(0, 0);
-					}
-
-					return a;
-				}
-				else
-				{
-					auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape(), 0);
-					SHAPE_LOOP(a->shape())
-					{
-						a->values(x, y) *= b->values(x, y);
-					}
-					return r;
-				}
-			}
-
-			SharedTapeVariable<DType> _elementwise_div(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
-			{
-				if (a->shape().isUnitary())
-				{
-					if (!b->shape().isUnitary())
-					{
-						// TODO(gpascualg): ERROR
-					}
-
-					a->values(0, 0) /= b->values(0, 0);
-					return a;
-				}
-				else if (b->shape().isUnitary())
-				{
-					SHAPE_LOOP(a->shape())
-					{
-						a->values(x, y) /= b->values(0, 0);
-					}
-
-					return a;
-				}
-				else
-				{
-					auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape(), 0);
-					SHAPE_LOOP(a->shape())
-					{
-						a->values(x, y) /= b->values(x, y);
-					}
-					return r;
-				}
-			}
-
-			SharedTapeVariable<DType> _sum(SharedTapeVariable<DType> a) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(Shape {1, 1}, 0);
-
-				SHAPE_LOOP(a->shape()) {
-					r->values(0, 0) += a->values(x, y);
-				}
-
-				return r;
-			}
-
-			SharedTapeVariable<DType> _sqrt(SharedTapeVariable<DType> a) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape(), 0);
-
-				SHAPE_LOOP(a->shape()) {
-					r->values(x, y) += std::sqrt(a->values(x, y));
-				}
-
-				return r;
-			}
-
-			SharedTapeVariable<DType> _pow(SharedTapeVariable<DType> a, float expo) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape(), 0);
-
-				SHAPE_LOOP(a->shape()) {
-					r->values(x, y) += std::pow(a->values(x, y), expo);
-				}
-
-				return r;
-			}
-
-			SharedTapeVariable<DType> _mul(SharedTapeVariable<DType> a, SharedTapeVariable<DType> b) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(Shape {a->shape().m, b->shape().n}, 0);
-
-				for (int i = 0; i < r->shape().m; ++i)
-				{
-					for (int j = 0; j < r->shape().n; ++j)
-					{
-						for (int k = 0; k < a->shape().n; ++k)
-						{
-							r->values(i, j) += a->values(i, k) * b->values(k, j);
-						}
-					}
-				}
-
-				return r;
-			}
-
-			SharedTapeVariable<DType> _transpose(SharedTapeVariable<DType> a) override
-			{
-				auto r = std::make_shared<Bare::CPU::Variable<DType>>(a->shape().T());
-
-				SHAPE_LOOP(a->shape()) {
-					r->values(y, x) = a->values(x, y);
-				}
-
-				return r;
-			}
+			*/
 		};
+
+		template <typename DType>
+		std::shared_ptr<Bare::CPU::Variable<DType>> operator+(std::shared_ptr<Bare::CPU::Variable<DType>> a, std::shared_ptr<Bare::CPU::Variable<DType>> b)
+		{
+			auto r = CPUOps<DType>::get()->add(Tape::current(), a->shape(), a->_values, b->_values);
+			return std::make_shared<Bare::CPU::Variable<DType>>(CPUOps<DType>::get(), a->shape(), r);
+		}
 	}
 }
 
@@ -371,7 +233,7 @@ namespace F32
 	{
 		inline std::shared_ptr<Bare::CPU::Variable<float>> Variable(Shape shape, float value)
 		{
-			return make_variable<Bare::CPU::Variable<float>>(shape, value);
+			return make_variable<Bare::CPU::Variable<float>>(CPUOps<float>::get(), shape, value);
 		}
 	}
 }
@@ -382,7 +244,7 @@ namespace F64
 	{
 		inline std::shared_ptr<Bare::CPU::Variable<double>> Variable(Shape shape, double value)
 		{
-			return make_variable<Bare::CPU::Variable<double>>(shape, value);
+			return make_variable<Bare::CPU::Variable<double>>(CPUOps<double>::get(), shape, value);
 		}
 	}
 }

@@ -41,7 +41,7 @@ class Pool
 
 public:
     template <typename T>
-    void* allocate(uint32_t size);
+    T* allocate(uint32_t size);
 
     template <typename T>
     void deallocate(void* memory, uint32_t size);
@@ -107,14 +107,14 @@ private:
 
 
 template <typename T>
-void* Pool::allocate(uint32_t size)
+T* Pool::allocate(uint32_t size)
 {
     uint32_t memsize = size * sizeof(T);
     std::lock_guard<std::mutex> lock(_lockFreeQueue);
 
     if (_freeBlocks.empty())
     {
-        return create(memsize);
+        return (T*)create(memsize);
     }
 
     for (auto it = _freeBlocks.cbegin(); it != _freeBlocks.cend(); ++it)
@@ -123,12 +123,12 @@ void* Pool::allocate(uint32_t size)
         {
             void* memory = (*it).memory;
             _freeBlocks.erase(it);
-            return memory;
+            return (T*)memory;
         }
     }
 
     // No block big enough has been found
-    return create(memsize);
+    return (T*)create(memsize);
 }
 
 template <typename T>

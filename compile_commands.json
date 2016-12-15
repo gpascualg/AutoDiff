@@ -1,42 +1,47 @@
 [
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/optimizer/optimizer.cpp.o -c /home/guillem/Github/AutoDiff/src/optimizer/optimizer.cpp",
+  "command": "/usr/bin/c++   -DDEBUG -I/home/guillem/Github/AutoDiff/src/exe -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g   -std=gnu++14 -o CMakeFiles/AutoDiff-Exe.dir/exe/main.cpp.o -c /home/guillem/Github/AutoDiff/src/exe/main.cpp",
+  "file": "/home/guillem/Github/AutoDiff/src/exe/main.cpp"
+},
+{
+  "directory": "/home/guillem/Github/AutoDiff/build/src",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/main.cpp.o -c /home/guillem/Github/AutoDiff/src/main.cpp",
+  "file": "/home/guillem/Github/AutoDiff/src/main.cpp"
+},
+{
+  "directory": "/home/guillem/Github/AutoDiff/build/src",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/ops/cpu.cpp.o -c /home/guillem/Github/AutoDiff/src/ops/cpu.cpp",
+  "file": "/home/guillem/Github/AutoDiff/src/ops/cpu.cpp"
+},
+{
+  "directory": "/home/guillem/Github/AutoDiff/build/src",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/optimizer/optimizer.cpp.o -c /home/guillem/Github/AutoDiff/src/optimizer/optimizer.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/optimizer/optimizer.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/pool/memory_pool.cpp.o -c /home/guillem/Github/AutoDiff/src/pool/memory_pool.cpp",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/pool/memory_pool.cpp.o -c /home/guillem/Github/AutoDiff/src/pool/memory_pool.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/pool/memory_pool.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/tape/tape.cpp.o -c /home/guillem/Github/AutoDiff/src/tape/tape.cpp",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/tape/tape.cpp.o -c /home/guillem/Github/AutoDiff/src/tape/tape.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/tape/tape.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/variable/cpu.cpp.o -c /home/guillem/Github/AutoDiff/src/variable/cpu.cpp",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/variable/cpu.cpp.o -c /home/guillem/Github/AutoDiff/src/variable/cpu.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/variable/cpu.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/variable/blas.cpp.o -c /home/guillem/Github/AutoDiff/src/variable/blas.cpp",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/variable/blas.cpp.o -c /home/guillem/Github/AutoDiff/src/variable/blas.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/variable/blas.cpp"
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/variable/variable.cpp.o -c /home/guillem/Github/AutoDiff/src/variable/variable.cpp",
+  "command": "/usr/bin/c++   -DAutoDiff_Lib_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src -I/home/guillem/Github/AutoDiff/src/ops -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Lib.dir/variable/variable.cpp.o -c /home/guillem/Github/AutoDiff/src/variable/variable.cpp",
   "file": "/home/guillem/Github/AutoDiff/src/variable/variable.cpp"
-},
-{
-  "directory": "/home/guillem/Github/AutoDiff/build/src",
-  "command": "/usr/bin/c++   -DDEBUG -I/home/guillem/Github/AutoDiff/src/exe -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g   -std=gnu++14 -o CMakeFiles/AutoDiff-Exe.dir/exe/main.cpp.o -c /home/guillem/Github/AutoDiff/src/exe/main.cpp",
-  "file": "/home/guillem/Github/AutoDiff/src/exe/main.cpp"
-},
-{
-  "directory": "/home/guillem/Github/AutoDiff/build/python",
-  "command": "/usr/bin/c++   -DAutoDiff_Python_EXPORTS -DDEBUG -I/home/guillem/Github/AutoDiff/build/third_party/src/pybind_pybind11-build -I/home/guillem/Github/AutoDiff/build/third_party/src/pybind_pybind11-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/pybind_pybind11/include -I/home/guillem/Github/AutoDiff/python -I/home/guillem/anaconda2/include/python2.7 -I/home/guillem/Github/AutoDiff/build/src -I/home/guillem/Github/AutoDiff/src/optimizer -I/home/guillem/Github/AutoDiff/src/pool -I/home/guillem/Github/AutoDiff/src/tape -I/home/guillem/Github/AutoDiff/src/variable -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenVML/include -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS-build -I/home/guillem/Github/AutoDiff/build/third_party/src/xianyi_OpenBLAS  -g -fPIC   -std=gnu++14 -o CMakeFiles/AutoDiff-Python.dir/main.cpp.o -c /home/guillem/Github/AutoDiff/python/main.cpp",
-  "file": "/home/guillem/Github/AutoDiff/python/main.cpp"
 }
 ]

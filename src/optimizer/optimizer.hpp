@@ -12,7 +12,6 @@ public:
     void reset(float to) override;
 
     inline void* untyped_values() override { return nullptr; }
-    inline void* untyped_adjoints() override { return nullptr; }
 
 private:
     std::shared_ptr<Bare::Variable<DType>> _target;

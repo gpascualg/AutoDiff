@@ -9,6 +9,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DI
 # -[ Find sources
 set(AUTODIFF_FOLDERS
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/ops
     ${CMAKE_CURRENT_SOURCE_DIR}/optimizer
     ${CMAKE_CURRENT_SOURCE_DIR}/pool
     ${CMAKE_CURRENT_SOURCE_DIR}/tape
@@ -72,6 +74,13 @@ if (AutoDiff-Lib_IS_RESOLVED)
         TARGET AutoDiff-Lib
         DEPENDENCY ${OPENVML_LIB}
     )
+
+    if (UNIX)
+        AddDependency(
+            TARGET AutoDiff-Lib
+            DEPENDENCY pthread
+        )
+    endif()
 
     set(LIB_BUILD_TYPE "SHARED_LIB")
     if (BUILD_STATIC_LIB)

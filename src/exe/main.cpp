@@ -3,14 +3,17 @@
 #include <functional>
 #include <memory>
 
-#include <variable.hpp>
-#include <cpu.hpp>
-#include <blas.hpp>
-#include <tape.hpp>
-#include <optimizer.hpp>
+#include <variable/variable.hpp>
+#include <variable/cpu.hpp>
+#include <variable/blas.hpp>
+#include <tape/tape.hpp>
+#include <optimizer/optimizer.hpp>
 
-
-using namespace F32::BLAS;
+#ifdef WITH_BLAS_SUPPORT
+	using namespace F32::BLAS;
+#else
+	using namespace F32::CPU;
+#endif
 
 #if !defined(NDEBUG)
 	template <typename DType>
@@ -51,7 +54,8 @@ int main()
 
 	x->values(0, 3) = 5;
 
-	auto r = mul(x + z, y) / std::make_shared<Bare::Constant<float>>(100.0);
+	auto r = x + y;
+	//auto r = mul(x + z, y) / std::make_shared<Bare::Constant<float>>(100.0);
 	//auto r = mul(x + z, y) / std::make_shared<Bare::Constant<float>>(100.0);
 
 	matprint<float>(r->shape(), r->values());
@@ -61,13 +65,13 @@ int main()
 	Tape::current()->execute({ r });
 
 	printf("X:\n");
-	matprint<float>(x->shape(), x->adjoints());
+	matprint<float>(x->shape(), Tape::current()->getOrCreateAdjoint({1,1}, x->values()));
 
 	printf("Y:\n");
-	matprint<float>(y->shape(), y->adjoints());
+	matprint<float>(y->shape(), Tape::current()->getOrCreateAdjoint({1,1}, y->values()));
 
 	printf("Z:\n");
-	matprint<float>(z->shape(), z->adjoints());
+	matprint<float>(z->shape(), Tape::current()->getOrCreateAdjoint({1,1}, z->values()));
 
 	return 0;
 }

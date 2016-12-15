@@ -3,5 +3,6 @@
 Debug/
 Release/
 [bB]uild/
+build_emsdk/
 *.pyc
 .ipynb_checkpoints/

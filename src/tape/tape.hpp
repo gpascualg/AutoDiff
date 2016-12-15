@@ -3,10 +3,12 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <unordered_map>
 #include <stdlib.h> // malloc
 
 class Pool;
 class Tape;
+template <typename T> class Ops;
 
 struct Shape
 {
@@ -24,7 +26,7 @@ struct Shape
 	inline constexpr Shape T() const { return { n, m }; }
 	inline constexpr int idx(int x, int y) const { return y * n + x; }
 
-	inline constexpr int operator[](Shape&& shape) { return idx(shape.m, shape.n); }
+	inline constexpr int operator[](Shape&& shape) const { return idx(shape.m, shape.n); }
 
 	inline constexpr bool isUnitary() const { return m == n && n == 1; }
 
@@ -34,14 +36,14 @@ struct Shape
 
 #define SHAPE_LOOP(shape) for (int y = 0; y < (shape).m; ++y) for (int x = 0; x < (shape).n; ++x)
 #define SELF_SHAPE_LOOP() SHAPE_LOOP(this->shape())
-#define CIDX(shape) shape[{x, y}]
-
+#define CIDX(shape) CIDX_(shape, x, y)
+#define CIDX_(shape, x, y) shape[Shape {x, y}]
 
 class TapeVariable
 {
 public:
 	TapeVariable():
-		_isTrainable()
+		_isTrainable(true)
 	{}
 
 	explicit TapeVariable(Shape shape):
@@ -50,7 +52,6 @@ public:
 
 	virtual void reset(float to) {};
 	virtual inline void* untyped_values() = 0;
-	virtual inline void* untyped_adjoints() = 0;
 	virtual inline const Shape& shape() const { return _shape; }
 
 
@@ -66,21 +67,27 @@ template <typename DType>
 class SpecializedTapeVariable: public TapeVariable
 {
 public:
-	using TapeVariable::TapeVariable;
+	explicit SpecializedTapeVariable(Ops<DType>* ops):
+		TapeVariable(),
+		_ops(ops)
+	{}
+
+	SpecializedTapeVariable(Ops<DType>* ops, Shape shape):
+		TapeVariable(shape),
+		_ops(ops)
+	{}
+
+	inline Ops<DType>* ops() { return _ops; }
 
 	inline void* untyped_values() override { return (void*)_values; }
 	inline DType* values() { return _values; }
 	inline DType& values(int x, int y) { return _values[_shape[{x, y}]]; }
 
-	inline void* untyped_adjoints() override { return (void*)_adjs; }
-	inline DType* adjoints() { return _adjs; }
-	inline DType& adjoints(int x, int y) { return _adjs[_shape[{x, y}]]; }
-
 	void update(std::shared_ptr<SpecializedTapeVariable<DType>> var);
 
 protected:
+	Ops<DType>* _ops = nullptr;
 	DType* _values = nullptr;
-	DType* _adjs = nullptr;
 };
 
 class Tape
@@ -151,12 +158,46 @@ public:
 		return _variables;
 	}
 
+
+	/* TAPE PUSHING METHODS */
+	template <typename DType>
+	DType* getOrCreateAdjoint(const Shape& shape, DType* mem);
+
+	template <typename DType>
+	void add(DType* result, const Shape& shape, DType* a, DType* b);
+
+	template <typename DType>
+    void sub(DType* result, const Shape& shape, DType* a, DType* b);
+
+	template <typename DType>
+    void elementwise_mul(DType* result, const Shape& shape_a, DType* a, const Shape& shape_b, DType* b);
+
+	template <typename DType>
+    void elementwise_div(DType* result, const Shape& shape_a, DType* a, const Shape& shape_b, DType* b);
+
+	template <typename DType>
+    void sum(DType* result, const Shape& shape, DType* a);
+
+	template <typename DType>
+    void sqrt(DType* result, const Shape& shape, DType* a);
+
+	template <typename DType>
+    void pow(DType* result, const Shape& shape, DType* a, float expo);
+
+	template <typename DType>
+    void mul(DType* result, const Shape& shape_a, DType* a, const Shape& shape_b, DType* b);
+
+	template <typename DType>
+    void transpose(DType* result, const Shape& shape, DType* a);
+
+
 private:
 	Tape();
 
 private:
 	std::vector<std::function<void()>> _tape;
 	std::vector<std::shared_ptr<TapeVariable>> _variables;
+	std::unordered_map<intptr_t, intptr_t> _adjoints;
 
 private:
 	static Tape* _last;
