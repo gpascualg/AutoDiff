@@ -35,4 +35,11 @@ if (BUILD_TESTS)
         EXECUTABLE
         OUTPUT_NAME AutoDiff-Tests
     )
+
+    include(Coverage)
+    SETUP_TARGET_FOR_COVERAGE(
+        AutoDiff-Coverage
+        AutoDiff-Tests
+        coverage
+    )
 endif()
