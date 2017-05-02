@@ -31,5 +31,21 @@ TEST_CASE("Variables can be operated with by using operators", "[variable]") {
         REQUIRE(are_close(var2->raw(), 2.4));
         REQUIRE(are_close(var3->raw(), 2 - 2.4));
     }
+
+    SECTION("They can be multiplied") {
+        SharedVariable<float> var3 = var1 * var2;
+
+        REQUIRE(are_close(var1->raw(), 2));
+        REQUIRE(are_close(var2->raw(), 2.4));
+        REQUIRE(are_close(var3->raw(), 2 * 2.4));
+    }
+
+    SECTION("They can be divided") {
+        SharedVariable<float> var3 = var1 / var2;
+
+        REQUIRE(are_close(var1->raw(), 2));
+        REQUIRE(are_close(var2->raw(), 2.4));
+        REQUIRE(are_close(var3->raw(), 2 / 2.4));
+    }
 }
 

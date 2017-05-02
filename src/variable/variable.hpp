@@ -34,6 +34,8 @@ public:
 
     template <typename D> friend SharedVariable<D> operator+(const SharedVariable<D>& var1, const SharedVariable<D>& var2);
     template <typename D> friend SharedVariable<D> operator-(const SharedVariable<D>& var1, const SharedVariable<D>& var2);
+    template <typename D> friend SharedVariable<D> operator*(const SharedVariable<D>& var1, const SharedVariable<D>& var2);
+    template <typename D> friend SharedVariable<D> operator/(const SharedVariable<D>& var1, const SharedVariable<D>& var2);
 
 protected:
     Variable(T value);
