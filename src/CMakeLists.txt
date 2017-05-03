@@ -31,6 +31,13 @@ if (AutoDiff-Lib_IS_RESOLVED)
         set(LIB_BUILD_TYPE "STATIC_LIB")
     endif()
 
+    if (BUILD_TESTS)
+        AddDependency(
+            TARGET AutoDiff-Lib
+            DEPENDENCY gcov
+        )
+    endif()
+
     BuildNow(
        TARGET AutoDiff-Lib
        ${LIB_BUILD_TYPE}

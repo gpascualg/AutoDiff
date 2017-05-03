@@ -36,6 +36,9 @@ if (BUILD_TESTS)
         OUTPUT_NAME AutoDiff-Tests
     )
 
+    set_target_properties(AutoDiff-Lib PROPERTIES COMPILE_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+    set_target_properties(AutoDiff-Tests PROPERTIES COMPILE_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+
     include(Coverage)
     SETUP_TARGET_FOR_COVERAGE(
         AutoDiff-Coverage
