@@ -13,9 +13,10 @@ AddToIncludes(
 # -[ Find sources
 set(AUTODIFF_FOLDERS
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/helpers
     ${CMAKE_CURRENT_SOURCE_DIR}/variable
 )
-AddALLToSources(
+AddAllToSources(
     TARGET AutoDiff-Lib
     DIRS ${AUTODIFF_FOLDERS}
     GLOB_SEARCH ".hpp;.cpp"
@@ -31,7 +32,7 @@ if (AutoDiff-Lib_IS_RESOLVED)
         set(LIB_BUILD_TYPE "STATIC_LIB")
     endif()
 
-    if (BUILD_TESTS)
+    if (BUILD_TESTS AND UNIX)
         AddDependency(
             TARGET AutoDiff-Lib
             DEPENDENCY gcov

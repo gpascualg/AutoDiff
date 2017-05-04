@@ -3,18 +3,7 @@
 #include <cmath>
 #include <memory>
 
-
-template <typename T>
-inline bool are_close(T a, T b, T rtol=T(1e-5), T atol=T(1e-8))
-{
-    return std::abs(a - b) <= (atol + rtol * std::abs(b));
-}
-
-template <typename T, typename T2>
-inline bool are_close(T a, T2 b, T rtol=T(1e-5), T atol=T(1e-8))
-{
-    return are_close(a, static_cast<T>(b));
-}
+#include "helpers/type_traits.hpp"
 
 
 template <typename T>
@@ -28,8 +17,6 @@ template <typename T>
 class Variable
 {
 public:
-    static SharedVariable<T> make(T value);
-
     inline const T& raw() const { return _value; }
 
     template <typename D> friend SharedVariable<D> operator+(const SharedVariable<D>& var1, const SharedVariable<D>& var2);
@@ -46,8 +33,10 @@ private:
 
 
 template <typename T>
-SharedVariable<T> Variable<T>::make(T value) 
-{ 
+SharedVariable<T> make_variable(T value) 
+{
+    static_assert(is_same_type<T, float>::value || is_same_type<T, double>::value, "Only double and float");
+
     struct make_shared_enabler : public Variable<T> 
     { 
     public:

@@ -9,25 +9,25 @@ Variable<T>::Variable(T value) :
 template <typename T>
 SharedVariable<T> operator+(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
-    return Variable<T>::make(var1->raw() + var2->raw());
+    return make_variable<T>(var1->raw() + var2->raw());
 }
 
 template <typename T>
 SharedVariable<T> operator-(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
-    return Variable<T>::make(var1->raw() - var2->raw());
+    return make_variable<T>(var1->raw() - var2->raw());
 }
 
 template <typename T>
 SharedVariable<T> operator*(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
-    return Variable<T>::make(var1->raw() * var2->raw());
+    return make_variable<T>(var1->raw() * var2->raw());
 }
 
 template <typename T>
 SharedVariable<T> operator/(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
-    return Variable<T>::make(var1->raw() / var2->raw());
+    return make_variable<T>(var1->raw() / var2->raw());
 }
 
 
@@ -46,3 +46,5 @@ template SharedVariable<double> operator*(const SharedVariable<double>& var1, co
 template SharedVariable<float> operator/(const SharedVariable<float>& var1, const SharedVariable<float>& var2);
 template SharedVariable<double> operator/(const SharedVariable<double>& var1, const SharedVariable<double>& var2);
 
+template SharedVariable<float> make_variable(float value);
+template SharedVariable<double> make_variable(double value);
