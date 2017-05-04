@@ -14,6 +14,19 @@ if (BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/test_variable
     )
 
+    foreach (folder ${SOURCE_FOLDERS})
+        file(GLOB TMP_TESTS ${folder}/*.test)
+
+        foreach (test ${TMP_TESTS})
+            set(TEST_TEMPLATE "float")
+            configure_file(${test} ${test}_${TEST_TEMPLATE}.cpp)
+
+            set(TEST_TEMPLATE "double")
+            configure_file(${test} ${test}_${TEST_TEMPLATE}.cpp)
+        endforeach()
+    endforeach()
+
+
     AddAllToSources(
         TARGET AutoDiff-Tests
         DIRS ${SOURCE_FOLDERS}

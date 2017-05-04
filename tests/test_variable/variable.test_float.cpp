@@ -3,27 +3,32 @@
 #include "helpers/operations.hpp"
 #include "variable/variable.hpp"
 
+#define TEST_TEMPLATE float
 
-const float input1 = 2;
-const float input2 = 2.4;
+#define STR(a) STR_(a)
+#define STR_(a) #a
+#define TEST_TEMPLATE_STR STR(TEST_TEMPLATE)
+
+const TEST_TEMPLATE input1 = 2;
+const TEST_TEMPLATE input2 = 2.4;
 
 
-TEST_CASE("Variables can be created", "[variable]") {
+TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be created", "[variable]") {
     SECTION("Using the explicit make call") {
-        SharedVariable<float> var1 = make_variable<float>(input1);
-        SharedVariable<float> var2 = make_variable<float>(input2);
+        SharedVariable<TEST_TEMPLATE> var1 = make_variable<TEST_TEMPLATE>(input1);
+        SharedVariable<TEST_TEMPLATE> var2 = make_variable<TEST_TEMPLATE>(input2);
 
         REQUIRE(are_close(var1->raw(), input1));
         REQUIRE(are_close(var2->raw(), input2));
     }
 }
 
-TEST_CASE("Variables can be operated with by using operators", "[variable]") {
-    SharedVariable<float> var1 = make_variable<float>(input1);
-    SharedVariable<float> var2 = make_variable<float>(input2);
+TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be operated with by using operators", "[variable]") {
+    SharedVariable<TEST_TEMPLATE> var1 = make_variable<TEST_TEMPLATE>(input1);
+    SharedVariable<TEST_TEMPLATE> var2 = make_variable<TEST_TEMPLATE>(input2);
 
     SECTION("They can be summed") {
-        SharedVariable<float> var3 = var1 + var2;
+        SharedVariable<TEST_TEMPLATE> var3 = var1 + var2;
 
         REQUIRE(are_close(var1->raw(), input1));
         REQUIRE(are_close(var2->raw(), input2));
@@ -31,7 +36,7 @@ TEST_CASE("Variables can be operated with by using operators", "[variable]") {
     }
 
     SECTION("They can be substracted") {
-        SharedVariable<float> var3 = var1 - var2;
+        SharedVariable<TEST_TEMPLATE> var3 = var1 - var2;
 
         REQUIRE(are_close(var1->raw(), input1));
         REQUIRE(are_close(var2->raw(), input2));
@@ -39,7 +44,7 @@ TEST_CASE("Variables can be operated with by using operators", "[variable]") {
     }
 
     SECTION("They can be multiplied") {
-        SharedVariable<float> var3 = var1 * var2;
+        SharedVariable<TEST_TEMPLATE> var3 = var1 * var2;
 
         REQUIRE(are_close(var1->raw(), input1));
         REQUIRE(are_close(var2->raw(), input2));
@@ -47,7 +52,7 @@ TEST_CASE("Variables can be operated with by using operators", "[variable]") {
     }
 
     SECTION("They can be divided") {
-        SharedVariable<float> var3 = var1 / var2;
+        SharedVariable<TEST_TEMPLATE> var3 = var1 / var2;
 
         REQUIRE(are_close(var1->raw(), input1));
         REQUIRE(are_close(var2->raw(), input2));

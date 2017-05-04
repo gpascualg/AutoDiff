@@ -11,7 +11,12 @@
 },
 {
   "directory": "/home/guillem/Github/AutoDiff/build/tests",
-  "command": "/usr/bin/c++   -DDEBUG -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch-build -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch/include -I/home/guillem/Github/AutoDiff/tests -I/home/guillem/Github/AutoDiff/src  -g   -g -O0 -fprofile-arcs -ftest-coverage -std=gnu++14 -o CMakeFiles/AutoDiff-Tests.dir/test_variable/variable.cpp.o -c /home/guillem/Github/AutoDiff/tests/test_variable/variable.cpp",
-  "file": "/home/guillem/Github/AutoDiff/tests/test_variable/variable.cpp"
+  "command": "/usr/bin/c++   -DDEBUG -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch-build -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch/include -I/home/guillem/Github/AutoDiff/tests -I/home/guillem/Github/AutoDiff/src  -g   -g -O0 -fprofile-arcs -ftest-coverage -std=gnu++14 -o CMakeFiles/AutoDiff-Tests.dir/test_variable/variable.test_float.cpp.o -c /home/guillem/Github/AutoDiff/tests/test_variable/variable.test_float.cpp",
+  "file": "/home/guillem/Github/AutoDiff/tests/test_variable/variable.test_float.cpp"
+},
+{
+  "directory": "/home/guillem/Github/AutoDiff/build/tests",
+  "command": "/usr/bin/c++   -DDEBUG -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch-build -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch-build/include -I/home/guillem/Github/AutoDiff/build/third_party/src/philsquared_Catch/include -I/home/guillem/Github/AutoDiff/tests -I/home/guillem/Github/AutoDiff/src  -g   -g -O0 -fprofile-arcs -ftest-coverage -std=gnu++14 -o CMakeFiles/AutoDiff-Tests.dir/test_variable/variable.test_double.cpp.o -c /home/guillem/Github/AutoDiff/tests/test_variable/variable.test_double.cpp",
+  "file": "/home/guillem/Github/AutoDiff/tests/test_variable/variable.test_double.cpp"
 }
 ]
