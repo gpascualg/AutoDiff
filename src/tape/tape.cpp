@@ -37,12 +37,54 @@ bool Tape<T>::addToActive(SharedVariable<T> variable)
     auto tape = active();
     if (tape)
     {
-        tape->_references.emplace(tape->_refcount, variable);
+        tape->_references.emplace(variable, tape->_refcount);
         ++tape->_refcount;
         return true;
     }
 
     return false;
+}
+
+template <typename T>
+bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand, Operation&& op)
+{
+    auto tape = active();
+    if (tape)
+    {
+        tape->addEdge(operand, result);
+        return true;
+    }
+
+    return false;
+}
+
+template <typename T>
+bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand1, SharedVariable<T> operand2, Operation&& op)
+{
+    auto tape = active();
+    if (tape)
+    {
+        tape->addEdge(operand1, result);
+        tape->addEdge(operand2, result);
+        return true;
+    }
+
+    return false;
+}
+
+template <typename T>
+void Tape<T>::addEdge(SharedVariable<T> from, SharedVariable<T> to)
+{
+    auto ref1 = _references[from];
+    auto ref2 = _references[to];
+
+    auto it = _references.find(from);
+    if (it == _references.end())
+    {
+        _edges[ref1] = std::vector<uint32_t>();
+    }
+
+    _edges[ref1].emplace_back(ref2);
 }
 
 

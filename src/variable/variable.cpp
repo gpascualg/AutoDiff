@@ -10,7 +10,9 @@ Variable<T>::Variable(T value) :
 template <typename T>
 SharedVariable<T> operator+(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
-    return make_variable<T>(var1->raw() + var2->raw());
+    auto result = make_variable<T>(var1->raw() + var2->raw());
+    Tape<T>::addOperation(result, var1, var2, [](){});
+    return result;
 }
 
 template <typename T>
