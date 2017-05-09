@@ -79,13 +79,6 @@ void Tape<T>::addEdge(SharedVariable<T> from, SharedVariable<T> to)
 {
     auto ref1 = _references[from];
     auto ref2 = _references[to];
-
-    auto it = _references.find(from);
-    if (it == _references.end())
-    {
-        _edges[ref1] = std::vector<uint32_t>();
-    }
-
     _edges[ref1].emplace_back(ref2);
 }
 
@@ -93,13 +86,6 @@ template <typename T>
 void Tape<T>::addOperation(SharedVariable<T> result, Operation&& op)
 {
     auto ref = _references[result];
-
-    auto it = _operations.find(ref);
-    if (it == _operations.end())
-    {
-        _operations[ref] = std::vector<Operation>();
-    }
-
     _operations[ref].emplace_back(std::move(op));
 }
 
