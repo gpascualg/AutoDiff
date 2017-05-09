@@ -52,6 +52,7 @@ bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand, 
     if (tape)
     {
         tape->addEdge(operand, result);
+        tape->addOperation(result, std::move(op));
         return true;
     }
 
@@ -66,6 +67,7 @@ bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand1,
     {
         tape->addEdge(operand1, result);
         tape->addEdge(operand2, result);
+        tape->addOperation(result, std::move(op));
         return true;
     }
 
@@ -85,6 +87,20 @@ void Tape<T>::addEdge(SharedVariable<T> from, SharedVariable<T> to)
     }
 
     _edges[ref1].emplace_back(ref2);
+}
+
+template <typename T>
+void Tape<T>::addOperation(SharedVariable<T> result, Operation&& op)
+{
+    auto ref = _references[result];
+
+    auto it = _operations.find(ref);
+    if (it == _operations.end())
+    {
+        _operations[ref] = std::vector<Operation>();
+    }
+
+    _operations[ref].emplace_back(std::move(op));
 }
 
 

@@ -37,11 +37,19 @@ TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be added to tape of type 
         REQUIRE(tape->numVariables() == 3);
     }
 
-    SECTION("Operations push edges onto the tape") {
+    SECTION("Operations push edges into the tape") {
         auto var1 = make_variable<TEST_TEMPLATE>(input1);
         auto var2 = make_variable<TEST_TEMPLATE>(input2);
         auto var3 = var1 + var2;
 
         REQUIRE(tape->numEdges() == 2);
+    }
+
+    SECTION("Operations push operations into the tape") {
+        auto var1 = make_variable<TEST_TEMPLATE>(input1);
+        auto var2 = make_variable<TEST_TEMPLATE>(input2);
+        auto var3 = var1 + var2;
+
+        REQUIRE(tape->numOperations() == 1);
     }
 }
