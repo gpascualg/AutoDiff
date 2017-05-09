@@ -1,4 +1,5 @@
 #include "variable/variable.hpp"
+#include "tape/tape.hpp"
 
 
 template <typename T>
@@ -28,6 +29,24 @@ template <typename T>
 SharedVariable<T> operator/(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
     return make_variable<T>(var1->raw() / var2->raw());
+}
+
+template <typename T>
+SharedVariable<T> make_variable(T value) 
+{
+    static_assert(is_same_type<T, float>::value || is_same_type<T, double>::value, "Only double and float");
+
+    struct make_shared_enabler : public Variable<T> 
+    { 
+    public:
+        make_shared_enabler(T val) :
+            Variable<T>(val)
+        {}
+    };
+
+    auto variable = std::make_shared<make_shared_enabler>(value);
+    Tape<T>::addToActive(variable);
+    return variable;
 }
 
 

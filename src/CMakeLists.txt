@@ -14,6 +14,7 @@ AddToIncludes(
 set(AUTODIFF_FOLDERS
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/helpers
+    ${CMAKE_CURRENT_SOURCE_DIR}/tape
     ${CMAKE_CURRENT_SOURCE_DIR}/variable
 )
 AddAllToSources(

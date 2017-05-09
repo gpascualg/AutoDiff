@@ -12,6 +12,7 @@ if (BUILD_TESTS)
     set(SOURCE_FOLDERS
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/test_variable
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_tape
     )
 
     foreach (folder ${SOURCE_FOLDERS})
