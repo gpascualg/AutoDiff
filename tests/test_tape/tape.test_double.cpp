@@ -31,7 +31,7 @@ TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be added to tape of type 
 
     // ----------------------------------------------------
 
-    SECTION("+ Operations push variables onto the tape") {
+    SECTION("+ Operations push variables into the tape") {
         auto var1 = make_variable<TEST_TEMPLATE>(input1);
         auto var2 = make_variable<TEST_TEMPLATE>(input2);
         auto var3 = var1 + var2;
@@ -57,7 +57,7 @@ TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be added to tape of type 
 
     // ----------------------------------------------------
 
-    SECTION("- Operations push variables onto the tape") {
+    SECTION("- Operations push variables into the tape") {
         auto var1 = make_variable<TEST_TEMPLATE>(input1);
         auto var2 = make_variable<TEST_TEMPLATE>(input2);
         auto var3 = var1 - var2;
@@ -83,7 +83,7 @@ TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be added to tape of type 
 
     // ----------------------------------------------------
 
-    SECTION("* Operations push variables onto the tape") {
+    SECTION("* Operations push variables into the tape") {
         auto var1 = make_variable<TEST_TEMPLATE>(input1);
         auto var2 = make_variable<TEST_TEMPLATE>(input2);
         auto var3 = var1 * var2;
@@ -109,7 +109,7 @@ TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be added to tape of type 
 
     // ----------------------------------------------------
 
-    SECTION("/ Operations push variables onto the tape") {
+    SECTION("/ Operations push variables into the tape") {
         auto var1 = make_variable<TEST_TEMPLATE>(input1);
         auto var2 = make_variable<TEST_TEMPLATE>(input2);
         auto var3 = var1 / var2;
@@ -131,5 +131,22 @@ TEST_CASE("Variables of type " TEST_TEMPLATE_STR " can be added to tape of type 
         auto var3 = var1 / var2;
 
         REQUIRE(tape->numOperations() == 1);
+    }
+}
+
+TEST_CASE("Variables of type " TEST_TEMPLATE_STR " create adjoints of type " TEST_TEMPLATE_STR, "[tape]") {
+    auto tape = make_tape<TEST_TEMPLATE>();
+
+    SECTION("Using the explicit make call") {
+        auto variable = make_variable<TEST_TEMPLATE>(input1);
+
+        REQUIRE(Tape<TEST_TEMPLATE>::adjoint(variable) != nullptr);
+    }
+}
+
+TEST_CASE("Variables of type " TEST_TEMPLATE_STR " don't create adjoints of type " TEST_TEMPLATE_STR " if there is no Tape", "[tape]") {
+    SECTION("Using the explicit make call") {
+        auto variable = make_variable<TEST_TEMPLATE>(input1);
+        REQUIRE(Tape<TEST_TEMPLATE>::adjoint(variable) == nullptr);
     }
 }

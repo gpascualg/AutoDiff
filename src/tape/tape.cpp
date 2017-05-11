@@ -38,6 +38,7 @@ bool Tape<T>::addToActive(SharedVariable<T> variable)
     if (tape)
     {
         tape->_references.emplace(variable, tape->_refcount);
+        tape->_adjoints.emplace(tape->_refcount, make_variable<T>(0, false));
         ++tape->_refcount;
         return true;
     }
@@ -72,6 +73,19 @@ bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand1,
     }
 
     return false;
+}
+
+template <typename T>
+SharedVariable<T> Tape<T>::adjoint(SharedVariable<T> variable)
+{
+    auto tape = active();
+    if (tape)
+    {
+        auto ref = tape->_references[variable];
+        return tape->_adjoints[ref];
+    }
+
+    return nullptr;
 }
 
 template <typename T>

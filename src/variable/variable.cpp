@@ -40,7 +40,7 @@ SharedVariable<T> operator/(const SharedVariable<T>& var1, const SharedVariable<
 }
 
 template <typename T>
-SharedVariable<T> make_variable(T value) 
+SharedVariable<T> make_variable(T value, bool push) 
 {
     static_assert(is_same_type<T, float>::value || is_same_type<T, double>::value, "Only double and float");
 
@@ -53,7 +53,11 @@ SharedVariable<T> make_variable(T value)
     };
 
     auto variable = std::make_shared<make_shared_enabler>(value);
-    Tape<T>::addToActive(variable);
+    if (push)
+    {
+        Tape<T>::addToActive(variable);
+    }
+
     return variable;
 }
 
@@ -73,5 +77,5 @@ template SharedVariable<double> operator*(const SharedVariable<double>& var1, co
 template SharedVariable<float> operator/(const SharedVariable<float>& var1, const SharedVariable<float>& var2);
 template SharedVariable<double> operator/(const SharedVariable<double>& var1, const SharedVariable<double>& var2);
 
-template SharedVariable<float> make_variable(float value);
-template SharedVariable<double> make_variable(double value);
+template SharedVariable<float> make_variable(float value, bool push);
+template SharedVariable<double> make_variable(double value, bool push);

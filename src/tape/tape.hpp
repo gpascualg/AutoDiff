@@ -22,6 +22,7 @@ public:
     static bool addToActive(SharedVariable<T> variable);
     static bool addOperation(SharedVariable<T> result, SharedVariable<T> operand, Operation&& op);
     static bool addOperation(SharedVariable<T> result, SharedVariable<T> operand1, SharedVariable<T> operand2, Operation&& op);
+    static SharedVariable<T> adjoint(SharedVariable<T> variable);
 
     inline std::size_t numVariables() 
     { 
@@ -52,6 +53,7 @@ private:
 private:
     std::atomic<uint32_t> _refcount;
     std::unordered_map<SharedVariable<T>, uint32_t> _references;
+    std::unordered_map<uint32_t, SharedVariable<T>> _adjoints;
     std::unordered_map<uint32_t, std::vector<uint32_t>> _edges;
     std::unordered_map<uint32_t, std::vector<Operation>> _operations;
 

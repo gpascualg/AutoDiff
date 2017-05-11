@@ -26,4 +26,4 @@ private:
 };
 
 
-template <typename T> SharedVariable<T> make_variable(T value);
+template <typename T> SharedVariable<T> make_variable(T value, bool push = true);
