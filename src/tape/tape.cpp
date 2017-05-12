@@ -5,6 +5,17 @@
 template <typename T>
 Tape<T>* Tape<T>::_current = nullptr;
 
+Node::Node(uint32_t orig):
+    orig(orig)
+{}
+
+void Node::operator()()
+{
+    for (auto&& op: ops)
+    {
+        op();
+    }
+}
 
 template <typename T>
 Tape<T>::~Tape()
@@ -16,13 +27,44 @@ Tape<T>::~Tape()
 }
 
 template <typename T>
-Tape<T>::Tape()
+Tape<T>::Tape():
+    _refcount(0),
+    _root(nullptr)
 {}
 
 template <typename T>
 void Tape<T>::setActive()
 {
     _current = this;
+}
+
+template <typename T>
+void Tape<T>::execute(std::initializer_list<SharedVariable<T>> vars)
+{
+    for (auto var : vars)
+    {
+        auto ref = _references[var];
+        _adjoints[ref]->_value = 1;
+    }
+
+    for (auto var : vars)
+    {
+        auto ref = _references[var];
+        recurseEdge(_nodes[ref]);
+    }
+}
+
+#include <iostream>
+
+template <typename T>
+void Tape<T>::recurseEdge(Node* node)
+{
+    (*node)();
+
+    for (auto from: node->from)
+    {
+        recurseEdge(from);
+    }
 }
 
 template <typename T>
@@ -52,8 +94,12 @@ bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand, 
     auto tape = active();
     if (tape)
     {
-        tape->addEdge(operand, result);
-        tape->addOperation(result, std::move(op));
+        Node* from = tape->createOrGetNode(operand);
+        Node* to = tape->createOrGetNode(result, std::move(op));
+
+        to->from.push_back(from);
+        from->to.push_back(to);
+
         return true;
     }
 
@@ -66,9 +112,15 @@ bool Tape<T>::addOperation(SharedVariable<T> result, SharedVariable<T> operand1,
     auto tape = active();
     if (tape)
     {
-        tape->addEdge(operand1, result);
-        tape->addEdge(operand2, result);
-        tape->addOperation(result, std::move(op));
+        Node* from1 = tape->createOrGetNode(operand1);
+        Node* from2 = tape->createOrGetNode(operand2);
+        Node* to = tape->createOrGetNode(result, std::move(op));
+
+        to->from.push_back(from1);
+        to->from.push_back(from2);
+        from1->to.push_back(to);
+        from2->to.push_back(to);
+        
         return true;
     }
 
@@ -89,20 +141,28 @@ SharedVariable<T> Tape<T>::adjoint(SharedVariable<T> variable)
 }
 
 template <typename T>
-void Tape<T>::addEdge(SharedVariable<T> from, SharedVariable<T> to)
+Node* Tape<T>::createOrGetNode(SharedVariable<T> variable)
 {
-    auto ref1 = _references[from];
-    auto ref2 = _references[to];
-    _edges[ref1].emplace_back(ref2);
+    auto ref = _references[variable];
+    auto it = _nodes.find(ref);
+    
+    if (it != _nodes.end())
+    {
+        return it->second;
+    }
+
+    Node* node = new Node(ref);
+    _nodes.emplace(ref, node);
+    return node;
 }
 
 template <typename T>
-void Tape<T>::addOperation(SharedVariable<T> result, Operation&& op)
+Node* Tape<T>::createOrGetNode(SharedVariable<T> variable, Operation&& op)
 {
-    auto ref = _references[result];
-    _operations[ref].emplace_back(std::move(op));
+    auto node = createOrGetNode(variable);
+    node->ops.emplace_back(std::move(op));
+    return node;
 }
-
 
 template class Tape<float>;
 template class Tape<double>;

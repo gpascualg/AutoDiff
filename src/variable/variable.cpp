@@ -11,7 +11,11 @@ template <typename T>
 SharedVariable<T> operator+(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
     auto result = make_variable<T>(var1->raw() + var2->raw());
-    Tape<T>::addOperation(result, var1, var2, [](){});
+    Tape<T>::addOperation(result, var1, var2, [var1, var2, result](){
+        Tape<T>::adjoint(var1)->_value += Tape<T>::adjoint(result)->_value;
+        Tape<T>::adjoint(var2)->_value += Tape<T>::adjoint(result)->_value;
+    });
+
     return result;
 }
 
@@ -19,7 +23,11 @@ template <typename T>
 SharedVariable<T> operator-(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
     auto result = make_variable<T>(var1->raw() - var2->raw());
-    Tape<T>::addOperation(result, var1, var2, [](){});
+    Tape<T>::addOperation(result, var1, var2, [var1, var2, result](){
+        Tape<T>::adjoint(var1)->_value += Tape<T>::adjoint(result)->_value;
+        Tape<T>::adjoint(var2)->_value -= Tape<T>::adjoint(result)->_value;
+    });
+
     return result;
 }
 
@@ -27,7 +35,11 @@ template <typename T>
 SharedVariable<T> operator*(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
     auto result = make_variable<T>(var1->raw() * var2->raw());
-    Tape<T>::addOperation(result, var1, var2, [](){});
+    Tape<T>::addOperation(result, var1, var2, [var1, var2, result](){
+        Tape<T>::adjoint(var1)->_value += var2->_value * Tape<T>::adjoint(result)->_value;
+        Tape<T>::adjoint(var2)->_value += var1->_value * Tape<T>::adjoint(result)->_value;
+    });
+
     return result;
 }
 
@@ -35,7 +47,13 @@ template <typename T>
 SharedVariable<T> operator/(const SharedVariable<T>& var1, const SharedVariable<T>& var2)
 {
     auto result = make_variable<T>(var1->raw() / var2->raw());
-    Tape<T>::addOperation(result, var1, var2, [](){});
+    Tape<T>::addOperation(result, var1, var2, [var1, var2, result](){
+        auto bv2 = var2->_value * var2->_value;
+
+        Tape<T>::adjoint(var1)->_value += var2->_value * Tape<T>::adjoint(result)->_value / bv2;
+        Tape<T>::adjoint(var2)->_value -= var1->_value * Tape<T>::adjoint(result)->_value / bv2;
+    });
+
     return result;
 }
 

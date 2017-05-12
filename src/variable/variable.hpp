@@ -10,6 +10,8 @@
 template <typename T>
 class Variable
 {
+    template <typename D> friend class Tape;
+    
 public:
     inline const T& raw() const { return _value; }
 
