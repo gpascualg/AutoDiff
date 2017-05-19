@@ -75,7 +75,6 @@ private:
     std::unordered_map<SharedVariable<T>, uint32_t> _references;
     std::unordered_map<uint32_t, SharedVariable<T>> _adjoints;
     std::unordered_map<uint32_t, Node*> _nodes;
-    Node* _root;
 
     static Tape<T>* _current;
 };

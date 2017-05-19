@@ -28,8 +28,7 @@ Tape<T>::~Tape()
 
 template <typename T>
 Tape<T>::Tape():
-    _refcount(0),
-    _root(nullptr)
+    _refcount(0)
 {}
 
 template <typename T>
@@ -44,7 +43,7 @@ void Tape<T>::execute(std::initializer_list<SharedVariable<T>> vars)
     for (auto var : vars)
     {
         auto ref = _references[var];
-        _adjoints[ref]->_value = 1;
+        LOOP(_adjoints[ref]) { _adjoints[ref]->_value[i] = 1; }
     }
 
     for (auto var : vars)
