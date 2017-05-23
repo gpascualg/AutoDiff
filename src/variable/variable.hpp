@@ -8,7 +8,7 @@
 
 #include "helpers/forward.hpp"
 #include "helpers/type_traits.hpp"
-
+#include "variable/shape.hpp"
 
 
 #define ASSERT_SAME_SHAPE(var1, var2) assert(var1->_shape == var2->_shape)
@@ -16,57 +16,6 @@
 #define ADJ(var) Tape<T>::adjoint(var)
 #define AT(var) var->_value[i]
 
-
-template <int Dims = 2>
-struct Shape
-{
-    template <typename... T>
-    Shape(T... d)
-    {
-        static_assert(sizeof...(d) == Dims, "Wrong dimensions");
-
-        int i = 0;
-        for (auto& v: {d...})
-        {
-            _dims[i++] = v;
-        }
-    }
-    
-    Shape(const Shape<Dims>& shape)
-    {
-        for (int i = 0; i < Dims; ++i)
-        {
-            _dims[i] = shape[i];
-        }
-    }
-
-    uint32_t prod() const
-    {
-        return std::accumulate(_dims, _dims + Dims, 1, std::multiplies<uint32_t>());
-    }
-
-    uint32_t operator[](uint8_t idx) const
-    {
-        assert(idx < Dims);
-        return _dims[idx];
-    }
-
-    bool operator==(const Shape<Dims>& other) const
-    {
-        for (int i = 0; i < Dims; ++i)
-        {
-            if (other[i] != _dims[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-private:
-    uint32_t _dims[Dims];
-};
 
 template <typename T>
 class Variable
